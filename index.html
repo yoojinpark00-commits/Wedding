@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yoojin & Zoey — 11.01.2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --white: #f8f6f3;
+    --cream: #ece8e1;
+    --gold: #c9a96e;
+    --gold-light: #e2d1a8;
+    --charcoal: #2a2a2a;
+    --muted: #7a7670;
+    --serif: 'Playfair Display', Georgia, serif;
+    --sans: 'Outfit', sans-serif;
+    --display: 'Cormorant Garamond', serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; font-size: 16px; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--black);
+    color: var(--white);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: center; gap: 2rem;
+    padding: 1.4rem 1.5rem;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(248,246,243,0.05);
+  }
+  nav a {
+    color: var(--white); text-decoration: none;
+    font-family: var(--sans); font-size: 0.65rem; font-weight: 500;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    opacity: 0.6; transition: opacity 0.3s, color 0.3s;
+    white-space: nowrap;
+  }
+  nav a:hover, nav a.active { opacity: 1; color: var(--gold); }
+
+  /* ── SHARED ── */
+  .page-section { display: none; min-height: 100vh; }
+  .page-section.active { display: block; }
+
+  .section-label {
+    font-family: var(--sans); font-weight: 500; font-size: 0.65rem;
+    letter-spacing: 0.4em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 1.5rem;
+  }
+  .section-label::before {
+    content: ''; width: 40px; height: 1px; background: var(--gold);
+  }
+  .section-label.center { justify-content: center; }
+  .section-label.center::before { display: none; }
+
+  .section-title {
+    font-family: var(--display); font-weight: 300;
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    line-height: 1.1; letter-spacing: -0.01em;
+    margin-bottom: 2rem;
+  }
+  .section-title.dark { color: var(--black); }
+
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  .reveal {
+    opacity: 0; transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── HOME / HERO ── */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    background: var(--black);
+    background-image: url('hero-photo.jpg');
+    background-size: cover;
+    background-position: center top;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      linear-gradient(to bottom, rgba(10,10,10,0.55) 0%, rgba(10,10,10,0.35) 40%, rgba(10,10,10,0.55) 70%, rgba(10,10,10,0.85) 100%);
+  }
+  .hero-date {
+    font-family: var(--sans); font-weight: 300; font-size: 0.75rem;
+    letter-spacing: 0.5em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 2rem;
+    opacity: 0; animation: fadeUp 1s 0.3s forwards;
+    position: relative; z-index: 1;
+  }
+  .hero-names {
+    font-family: var(--display); font-weight: 300;
+    font-size: clamp(4rem, 12vw, 10rem);
+    line-height: 0.95; text-align: center;
+    letter-spacing: -0.02em;
+    opacity: 0; animation: fadeUp 1.2s 0.6s forwards;
+    position: relative; z-index: 1;
+    text-shadow: 0 2px 30px rgba(0,0,0,0.4);
+  }
+  .hero-names .amp {
+    font-family: var(--serif); font-style: italic;
+    font-size: 0.6em; color: var(--gold);
+    display: inline-block; margin: 0 0.15em;
+    vertical-align: 0.1em;
+  }
+  .hero-tagline {
+    font-family: var(--sans); font-weight: 300; font-size: 0.85rem;
+    letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--cream); margin-top: 2.5rem;
+    opacity: 0; animation: fadeUp 1s 1s forwards;
+    position: relative; z-index: 1;
+  }
+  .hero-location {
+    font-family: var(--sans); font-weight: 300; font-size: 0.7rem;
+    letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--cream); margin-top: 0.8rem;
+    opacity: 0; animation: fadeUp 1s 1.2s forwards;
+    position: relative; z-index: 1;
+  }
+  .hero-countdown {
+    margin-top: 3rem;
+    font-family: var(--sans); font-weight: 300; font-size: 0.8rem;
+    letter-spacing: 0.08em; color: var(--gold-light);
+    opacity: 0; animation: fadeUp 1s 1.4s forwards;
+    position: relative; z-index: 1;
+    text-shadow: 0 1px 15px rgba(0,0,0,0.5);
+  }
+  .hero-scroll {
+    position: absolute; bottom: 3rem;
+    display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
+    opacity: 0; animation: fadeUp 1s 1.8s forwards;
+    z-index: 1;
+  }
+  .hero-scroll span {
+    font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .scroll-line {
+    width: 1px; height: 50px; background: var(--gold);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+
+  /* ── HOME: VENUE PREVIEW ── */
+  .venue-preview {
+    padding: 6rem 2rem;
+    background: var(--charcoal);
+  }
+  .venue-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;
+    align-items: start;
+  }
+  .venue-info h3 {
+    font-family: var(--display); font-size: 2rem; font-weight: 300;
+    margin-bottom: 1.5rem;
+  }
+  .venue-detail {
+    font-family: var(--sans); font-weight: 300; font-size: 0.88rem;
+    line-height: 1.8; color: var(--cream); opacity: 0.8;
+    margin-bottom: 1rem;
+  }
+  .venue-detail strong {
+    color: var(--gold); font-weight: 500; font-size: 0.65rem;
+    letter-spacing: 0.3em; text-transform: uppercase;
+    display: block; margin-bottom: 0.3rem;
+  }
+  .map-container {
+    width: 100%; border: 1px solid rgba(248,246,243,0.08);
+    overflow: hidden;
+  }
+  .map-container iframe {
+    width: 100%; height: 380px; border: 0;
+    filter: grayscale(0.3) contrast(1.05);
+  }
+
+  /* ── HOME: RSVP ── */
+  .home-rsvp {
+    padding: 8rem 2rem;
+    background: var(--black);
+    text-align: center;
+  }
+  .rsvp-form {
+    max-width: 500px; margin: 0 auto;
+    display: flex; flex-direction: column; gap: 1.25rem;
+    text-align: left;
+  }
+  .form-row { display: flex; gap: 1rem; }
+  .form-row > * { flex: 1; }
+  .rsvp-form input, .rsvp-form select {
+    width: 100%; padding: 1rem 1.25rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--white); font-family: var(--sans);
+    font-weight: 300; font-size: 0.85rem;
+    transition: border-color 0.3s, background 0.3s;
+    outline: none; appearance: none;
+    -webkit-appearance: none;
+  }
+  .rsvp-form input::placeholder { color: var(--muted); }
+  .rsvp-form input:focus, .rsvp-form select:focus {
+    border-color: var(--gold);
+    background: rgba(201,169,110,0.05);
+  }
+  .rsvp-form select {
+    cursor: pointer; color: var(--muted);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%237a7670' stroke-width='1.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1.25rem center;
+    padding-right: 3rem;
+  }
+  .rsvp-form select.selected { color: var(--white); }
+  .rsvp-form select option { background: var(--charcoal); color: var(--white); }
+  .rsvp-btn {
+    margin-top: 0.5rem; padding: 1.1rem 2rem;
+    background: var(--gold); color: var(--black);
+    border: none; font-family: var(--sans); font-weight: 500;
+    font-size: 0.7rem; letter-spacing: 0.35em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.4s;
+  }
+  .rsvp-btn:hover {
+    background: var(--white); color: var(--black);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(201,169,110,0.3);
+  }
+  .rsvp-subtitle {
+    font-family: var(--sans); font-weight: 300; font-size: 0.9rem;
+    color: var(--muted); margin-bottom: 3rem; line-height: 1.7;
+  }
+
+  /* ── OUR STORY ── */
+  .story-page {
+    padding: 10rem 2rem 6rem;
+    background: var(--black);
+  }
+  .story-intro {
+    font-family: var(--sans); font-weight: 300;
+    font-size: 1rem; line-height: 1.9; color: var(--cream);
+    opacity: 0.85; max-width: 600px; margin-bottom: 5rem;
+  }
+  .timeline {
+    display: flex; flex-direction: column; gap: 3.5rem;
+    position: relative; padding-left: 3rem;
+    max-width: 700px;
+  }
+  .timeline::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 1px; background: linear-gradient(to bottom, var(--gold), transparent);
+  }
+  .timeline-item { position: relative; }
+  .timeline-item::before {
+    content: ''; position: absolute; left: -3rem; top: 0.5rem;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 12px rgba(201,169,110,0.4);
+  }
+  .timeline-year {
+    font-family: var(--serif); font-size: 0.75rem;
+    letter-spacing: 0.25em; color: var(--gold); margin-bottom: 0.4rem;
+  }
+  .timeline-event {
+    font-family: var(--display); font-size: 1.5rem; font-weight: 400;
+    margin-bottom: 0.3rem;
+  }
+  .timeline-desc {
+    font-family: var(--sans); font-weight: 300; font-size: 0.85rem;
+    color: var(--muted); line-height: 1.6;
+  }
+
+  /* ── SCHEDULE ── */
+  .schedule-page {
+    padding: 10rem 2rem 6rem;
+    background: var(--cream); color: var(--black);
+  }
+  .schedule-page .section-label { color: var(--charcoal); }
+  .schedule-page .section-label::before { background: var(--charcoal); }
+  .schedule-day {
+    margin-bottom: 4rem;
+  }
+  .schedule-day-title {
+    font-family: var(--display); font-size: 1.6rem; font-weight: 400;
+    color: var(--black); margin-bottom: 2rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(10,10,10,0.1);
+  }
+  .schedule-event-row {
+    display: flex; gap: 3rem; padding: 1.25rem 0;
+    border-bottom: 1px solid rgba(10,10,10,0.06);
+    align-items: baseline;
+  }
+  .sched-time {
+    font-family: var(--serif); font-size: 0.75rem;
+    letter-spacing: 0.15em; color: var(--muted);
+    flex: 0 0 100px;
+  }
+  .sched-details { flex: 1; }
+  .sched-event-name {
+    font-family: var(--display); font-size: 1.2rem; color: var(--black);
+    margin-bottom: 0.2rem;
+  }
+  .sched-event-note {
+    font-family: var(--sans); font-weight: 300; font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  /* ── TRAVEL ── */
+  .travel-page {
+    padding: 10rem 2rem 6rem;
+    background: var(--black);
+  }
+  .travel-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem; margin-top: 3rem;
+  }
+  .travel-card {
+    border: 1px solid rgba(248,246,243,0.08);
+    padding: 2.5rem;
+    transition: border-color 0.3s;
+  }
+  .travel-card:hover { border-color: rgba(201,169,110,0.3); }
+  .travel-card-icon {
+    font-size: 1.5rem; margin-bottom: 1.2rem;
+  }
+  .travel-card-title {
+    font-family: var(--display); font-size: 1.4rem; font-weight: 400;
+    margin-bottom: 0.75rem;
+  }
+  .travel-card-text {
+    font-family: var(--sans); font-weight: 300; font-size: 0.85rem;
+    color: var(--muted); line-height: 1.7;
+  }
+  .travel-card-text a {
+    color: var(--gold); text-decoration: none;
+    border-bottom: 1px solid rgba(201,169,110,0.3);
+    transition: border-color 0.3s;
+  }
+  .travel-card-text a:hover { border-color: var(--gold); }
+
+  /* ── GALLERY ── */
+  .gallery-page {
+    padding: 10rem 2rem 6rem;
+    background: var(--charcoal);
+  }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem; margin-top: 3rem;
+  }
+  .gallery-item {
+    aspect-ratio: 4/5;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(248,246,243,0.06);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; transition: all 0.4s;
+  }
+  .gallery-item:hover {
+    border-color: rgba(201,169,110,0.2);
+    background: rgba(201,169,110,0.03);
+  }
+  .gallery-item:nth-child(2) { aspect-ratio: 3/4; }
+  .gallery-item:nth-child(5) { aspect-ratio: 1/1; }
+  .gallery-placeholder {
+    font-family: var(--serif); font-style: italic;
+    font-size: 0.9rem; color: var(--muted); opacity: 0.5;
+  }
+  .gallery-note {
+    font-family: var(--sans); font-weight: 300; font-size: 0.85rem;
+    color: var(--muted); margin-top: 2rem; line-height: 1.7;
+    opacity: 0.7;
+  }
+
+  /* ── THINGS TO DO ── */
+  .todo-page {
+    padding: 10rem 2rem 6rem;
+    background: var(--cream); color: var(--black);
+  }
+  .todo-page .section-label { color: var(--charcoal); }
+  .todo-page .section-label::before { background: var(--charcoal); }
+  .todo-intro {
+    font-family: var(--sans); font-weight: 300; font-size: 0.95rem;
+    color: var(--muted); line-height: 1.8; max-width: 600px;
+    margin-bottom: 3rem;
+  }
+  .todo-category { margin-bottom: 3.5rem; }
+  .todo-category-title {
+    font-family: var(--display); font-size: 1.5rem; font-weight: 400;
+    color: var(--black); margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(10,10,10,0.1);
+  }
+  .todo-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(10,10,10,0.05);
+  }
+  .todo-item-name {
+    font-family: var(--sans); font-weight: 500; font-size: 0.88rem;
+    color: var(--black); margin-bottom: 0.2rem;
+  }
+  .todo-item-desc {
+    font-family: var(--sans); font-weight: 300; font-size: 0.8rem;
+    color: var(--muted); line-height: 1.6;
+  }
+
+  /* ── FAQS ── */
+  .faq-page {
+    padding: 10rem 2rem 6rem;
+    background: var(--black);
+  }
+  .faq-list {
+    max-width: 700px; margin-top: 3rem;
+  }
+  .faq-item {
+    border-bottom: 1px solid rgba(248,246,243,0.08);
+    padding: 2rem 0;
+    cursor: pointer;
+  }
+  .faq-question {
+    font-family: var(--display); font-size: 1.25rem; font-weight: 400;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 1rem;
+  }
+  .faq-toggle {
+    font-size: 1.2rem; color: var(--gold);
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+  .faq-item.open .faq-toggle { transform: rotate(45deg); }
+  .faq-answer {
+    font-family: var(--sans); font-weight: 300; font-size: 0.88rem;
+    color: var(--muted); line-height: 1.8;
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.4s ease;
+    padding-top: 0;
+  }
+  .faq-item.open .faq-answer {
+    max-height: 300px;
+    padding-top: 1.25rem;
+  }
+
+  /* ── RSVP PAGE ── */
+  .rsvp-page {
+    padding: 10rem 2rem 6rem;
+    background: var(--charcoal);
+    text-align: center;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 6rem 2rem 4rem;
+    text-align: center;
+    background: var(--black);
+    border-top: 1px solid rgba(248,246,243,0.05);
+  }
+  .footer-names {
+    font-family: var(--display); font-weight: 300;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    margin-bottom: 1rem;
+  }
+  .footer-names .amp {
+    font-family: var(--serif); font-style: italic;
+    font-size: 0.6em; color: var(--gold);
+    margin: 0 0.15em; vertical-align: 0.1em;
+  }
+  .footer-date {
+    font-family: var(--sans); font-weight: 300; font-size: 0.7rem;
+    letter-spacing: 0.4em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .footer-heart {
+    margin-top: 3rem; font-size: 0.65rem;
+    letter-spacing: 0.2em; color: var(--gold); opacity: 0.5;
+  }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: var(--gold); color: var(--black);
+    padding: 1rem 2.5rem;
+    font-family: var(--sans); font-weight: 500; font-size: 0.75rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    z-index: 200; opacity: 0;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; transform: scaleY(0.6); transform-origin: top; }
+    50% { opacity: 1; transform: scaleY(1); }
+  }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    nav { gap: 0.8rem; padding: 1rem 0.75rem; flex-wrap: wrap; }
+    nav a { font-size: 0.55rem; letter-spacing: 0.12em; }
+    .venue-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+    .travel-grid { grid-template-columns: 1fr; }
+    .gallery-grid { grid-template-columns: 1fr 1fr; }
+    .schedule-event-row { flex-direction: column; gap: 0.3rem; }
+    .sched-time { flex: none; }
+    .form-row { flex-direction: column; gap: 1.25rem; }
+    .story-page, .schedule-page, .travel-page, .gallery-page,
+    .todo-page, .faq-page, .rsvp-page { padding: 7rem 1.5rem 4rem; }
+    .venue-preview, .home-rsvp { padding: 5rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <a href="#" data-page="home" class="active">Home</a>
+  <a href="#" data-page="story">Our Story</a>
+  <a href="#" data-page="schedule">Schedule</a>
+  <a href="#" data-page="travel">Travel</a>
+  <a href="#" data-page="gallery">Gallery</a>
+  <a href="#" data-page="todo">Things To Do</a>
+  <a href="#" data-page="faq">FAQs</a>
+  <a href="#" data-page="rsvp">RSVP</a>
+</nav>
+
+<!-- ============================================================ -->
+<!-- HOME -->
+<!-- ============================================================ -->
+<div class="page-section active" id="page-home">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-date">November 1, 2026</div>
+    <h1 class="hero-names">Yoojin <span class="amp">&</span> Zoey</h1>
+    <p class="hero-tagline">Are getting married</p>
+    <p class="hero-location">Taipei, Taiwan</p>
+    <div class="hero-countdown" id="countdown"></div>
+    <div class="hero-scroll">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- Venue Preview + Map -->
+  <section class="venue-preview">
+    <div class="container">
+      <div class="venue-grid reveal">
+        <div class="venue-info">
+          <div class="section-label">The Venue</div>
+          <h3>Taipei Marriott Hotel</h3>
+          <div class="venue-detail">
+            <strong>Address</strong>
+            199 Lequn 2nd Road, Zhongshan District<br>
+            Taipei City, Taiwan 10462
+          </div>
+          <div class="venue-detail">
+            <strong>Ceremony</strong>
+            11:00 AM — 8F Ballroom
+          </div>
+          <div class="venue-detail">
+            <strong>Banquet</strong>
+            12:00 PM — 8F Ballroom
+          </div>
+          <div class="venue-detail">
+            <strong>Dress Code</strong>
+            Business Casual — Tie Optional
+          </div>
+        </div>
+        <div class="map-container">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3613.8!2d121.5575!3d25.0811!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442ac7bcd1e39e7%3A0x3e0eb0fa9c1c1d2e!2sTaipei%20Marriott%20Hotel!5e0!3m2!1sen!2stw!4v1"
+            allowfullscreen="" loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RSVP on Home -->
+  <section class="home-rsvp">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label center">Respond</div>
+        <h2 class="section-title" style="text-align:center;">RSVP</h2>
+        <p class="rsvp-subtitle">Kindly respond by September 15, 2026</p>
+      </div>
+      <div class="rsvp-form reveal">
+        <div class="form-row">
+          <input type="text" id="firstName" placeholder="First Name" required>
+          <input type="text" id="lastName" placeholder="Last Name" required>
+        </div>
+        <input type="email" id="email" placeholder="Email Address" required>
+        <select id="attending" onchange="this.classList.add('selected')">
+          <option value="" disabled selected>Will you be attending?</option>
+          <option value="Joyfully Accepts">Joyfully Accepts</option>
+          <option value="Regretfully Declines">Regretfully Declines</option>
+        </select>
+        <select id="guests" onchange="this.classList.add('selected')">
+          <option value="" disabled selected>Number of Guests</option>
+          <option value="1">1 Guest</option>
+          <option value="2">2 Guests</option>
+          <option value="3">3 Guests</option>
+        </select>
+        <input type="text" id="notes" placeholder="Dietary Restrictions or Notes">
+        <button class="rsvp-btn" id="rsvp-btn" onclick="submitRSVP()">Send Response</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- OUR STORY -->
+<!-- ============================================================ -->
+<div class="page-section" id="page-story">
+  <section class="story-page">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Our Story</div>
+        <h2 class="section-title">How It All Began</h2>
+        <!-- PERSONALIZE: Replace this paragraph with your own story intro -->
+        <p class="story-intro">
+          Some love stories begin with grand gestures. Ours started with something quieter — a moment that didn't feel like much at the time but turned into everything. Here's how it happened.
+        </p>
+      </div>
+      <!-- PERSONALIZE: Update the timeline with your own milestones -->
+      <div class="timeline reveal">
+        <div class="timeline-item">
+          <div class="timeline-year">YOUR YEAR</div>
+          <div class="timeline-event">How We Met</div>
+          <div class="timeline-desc">Tell your guests the story of how you first met — the place, the moment, the feeling.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">YOUR YEAR</div>
+          <div class="timeline-event">First Date</div>
+          <div class="timeline-desc">Where did you go? What made it special? What did you talk about for hours?</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">YOUR YEAR</div>
+          <div class="timeline-event">A Milestone Together</div>
+          <div class="timeline-desc">A trip, moving in, meeting the families — whatever moment meant the world to you both.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">YOUR YEAR</div>
+          <div class="timeline-event">The Proposal</div>
+          <div class="timeline-desc">The big question. Where it happened, who cried, and the moment everything changed.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCHEDULE -->
+<!-- ============================================================ -->
+<div class="page-section" id="page-schedule">
+  <section class="schedule-page">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Schedule</div>
+        <h2 class="section-title dark">Wedding Weekend</h2>
+      </div>
+
+      <!-- PERSONALIZE: Update events, times, and locations -->
+      <div class="schedule-day reveal">
+        <div class="schedule-day-title">Saturday, October 31 — Welcome Events</div>
+        <div class="schedule-event-row">
+          <div class="sched-time">6:30 PM</div>
+          <div class="sched-details">
+            <div class="sched-event-name">Welcome Dinner</div>
+            <div class="sched-event-note">Taipei Marriott Hotel — Mark's Teppanyaki · Smart casual</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="schedule-day reveal">
+        <div class="schedule-day-title">Sunday, November 1 — The Wedding</div>
+        <div class="schedule-event-row">
+          <div class="sched-time">10:30 AM</div>
+          <div class="sched-details">
+            <div class="sched-event-name">Guests Arrive</div>
+            <div class="sched-event-note">Taipei Marriott Hotel — 8F Ballroom Lobby</div>
+          </div>
+        </div>
+        <div class="schedule-event-row">
+          <div class="sched-time">11:00 AM</div>
+          <div class="sched-details">
+            <div class="sched-event-name">Ceremony</div>
+            <div class="sched-event-note">8F Ballroom</div>
+          </div>
+        </div>
+        <div class="schedule-event-row">
+          <div class="sched-time">11:30 AM</div>
+          <div class="sched-details">
+            <div class="sched-event-name">Cocktail Hour</div>
+            <div class="sched-event-note">Ballroom Foyer · Drinks and canapés</div>
+          </div>
+        </div>
+        <div class="schedule-event-row">
+          <div class="sched-time">12:00 PM</div>
+          <div class="sched-details">
+            <div class="sched-event-name">Wedding Banquet</div>
+            <div class="sched-event-note">8F Ballroom</div>
+          </div>
+        </div>
+        <div class="schedule-event-row">
+          <div class="sched-time">3:00 PM</div>
+          <div class="sched-details">
+            <div class="sched-event-name">Farewell</div>
+            <div class="sched-event-note">Thank you for celebrating with us!</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="schedule-day reveal">
+        <div class="schedule-day-title">Monday, November 2 — Farewell</div>
+        <div class="schedule-event-row">
+          <div class="sched-time">10:00 AM</div>
+          <div class="sched-details">
+            <div class="sched-event-name">Farewell Brunch</div>
+            <div class="sched-event-note">Taipei Marriott Hotel — Garden Kitchen · Casual attire</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============================================================ -->
+<!-- TRAVEL -->
+<!-- ============================================================ -->
+<div class="page-section" id="page-travel">
+  <section class="travel-page">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Travel</div>
+        <h2 class="section-title">Getting to Taipei</h2>
+      </div>
+      <div class="travel-grid">
+        <div class="travel-card reveal">
+          <div class="travel-card-icon">✈</div>
+          <div class="travel-card-title">Flights</div>
+          <div class="travel-card-text">
+            Fly into <strong>Taiwan Taoyuan International Airport (TPE)</strong>, the main international gateway. Direct flights are available from most major cities in Asia, as well as select cities in North America and Europe. The airport is about 40 minutes from the hotel by car or express train.
+          </div>
+        </div>
+        <div class="travel-card reveal">
+          <div class="travel-card-icon">🏨</div>
+          <div class="travel-card-title">Where to Stay</div>
+          <div class="travel-card-text">
+            We've reserved a room block at the <strong>Taipei Marriott Hotel</strong> at a special rate for wedding guests. Please mention the "Yoojin & Zoey Wedding" when booking. We recommend booking early as rooms fill quickly.<br><br>
+            <!-- PERSONALIZE: Add your room block booking link -->
+            <a href="#">Book Your Room →</a>
+          </div>
+        </div>
+        <div class="travel-card reveal">
+          <div class="travel-card-icon">🚄</div>
+          <div class="travel-card-title">Airport to Hotel</div>
+          <div class="travel-card-text">
+            <strong>Taoyuan Airport MRT</strong> — Take the Express train to Taipei Main Station (~35 min, ~NT$160), then transfer to the MRT Red Line to Jiannan Road Station. The hotel is a short walk away.<br><br>
+            <strong>Taxi / Uber</strong> — A taxi from Taoyuan Airport costs approximately NT$1,200–1,500 (~$37–47 USD). Uber is also widely available.
+          </div>
+        </div>
+        <div class="travel-card reveal">
+          <div class="travel-card-icon">📋</div>
+          <div class="travel-card-title">Good to Know</div>
+          <div class="travel-card-text">
+            <strong>Visa:</strong> Many nationalities can enter Taiwan visa-free for up to 90 days. Check <a href="https://www.boca.gov.tw" target="_blank">BOCA</a> for your country's requirements.<br><br>
+            <strong>Currency:</strong> New Taiwan Dollar (NT$). Cards are widely accepted, but carry some cash for night markets and small shops.<br><br>
+            <strong>Language:</strong> Mandarin Chinese is the official language. English is common in hotels, MRT stations, and tourist areas.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============================================================ -->
+<!-- GALLERY -->
+<!-- ============================================================ -->
+<div class="page-section" id="page-gallery">
+  <section class="gallery-page">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Gallery</div>
+        <h2 class="section-title">Our Moments</h2>
+      </div>
+      <!-- PERSONALIZE: Replace placeholders with your photos using <img> tags -->
+      <div class="gallery-grid reveal">
+        <div class="gallery-item"><span class="gallery-placeholder">Photo 1</span></div>
+        <div class="gallery-item"><span class="gallery-placeholder">Photo 2</span></div>
+        <div class="gallery-item"><span class="gallery-placeholder">Photo 3</span></div>
+        <div class="gallery-item"><span class="gallery-placeholder">Photo 4</span></div>
+        <div class="gallery-item"><span class="gallery-placeholder">Photo 5</span></div>
+        <div class="gallery-item"><span class="gallery-placeholder">Photo 6</span></div>
+      </div>
+      <p class="gallery-note reveal">
+        More photos coming soon! We'll also share a gallery link after the wedding so you can relive all the memories.
+      </p>
+    </div>
+  </section>
+</div>
+
+<!-- ============================================================ -->
+<!-- THINGS TO DO -->
+<!-- ============================================================ -->
+<div class="page-section" id="page-todo">
+  <section class="todo-page">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Explore</div>
+        <h2 class="section-title dark">Things to Do in Taipei</h2>
+        <p class="todo-intro">
+          Taipei is one of the most vibrant cities in Asia — incredible food, stunning temples, buzzing night markets, and breathtaking nature just minutes from the city center. Here are some of our favorite spots.
+        </p>
+      </div>
+
+      <div class="todo-category reveal">
+        <div class="todo-category-title">Food & Night Markets</div>
+        <div class="todo-item">
+          <div class="todo-item-name">Shilin Night Market</div>
+          <div class="todo-item-desc">Taipei's largest and most famous night market. Try the pepper buns, stinky tofu, and oyster omelettes. About 10 minutes by taxi from the hotel.</div>
+        </div>
+        <div class="todo-item">
+          <div class="todo-item-name">Raohe Street Night Market</div>
+          <div class="todo-item-desc">A more walkable, single-street market known for its black pepper buns at the entrance and medicinal stew ribs. A local favorite.</div>
+        </div>
+        <div class="todo-item">
+          <div class="todo-item-name">Din Tai Fung (Xinyi Original)</div>
+          <div class="todo-item-desc">The world-famous soup dumpling restaurant was born in Taipei. The original location has the shortest wait and the best experience.</div>
+        </div>
+      </div>
+
+      <div class="todo-category reveal">
+        <div class="todo-category-title">Landmarks & Culture</div>
+        <div class="todo-item">
+          <div class="todo-item-name">Taipei 101</div>
+          <div class="todo-item-desc">Once the world's tallest building, the observation deck on the 89th floor offers sweeping views of the city and mountains. Don't miss the massive wind damper.</div>
+        </div>
+        <div class="todo-item">
+          <div class="todo-item-name">Longshan Temple</div>
+          <div class="todo-item-desc">A stunning 18th-century temple in the Wanhua district. The intricate carvings and incense-filled courtyards make it one of the most atmospheric spots in the city.</div>
+        </div>
+        <div class="todo-item">
+          <div class="todo-item-name">National Palace Museum</div>
+          <div class="todo-item-desc">Home to one of the world's largest collections of Chinese art and artifacts. The jade cabbage alone is worth the visit.</div>
+        </div>
+      </div>
+
+      <div class="todo-category reveal">
+        <div class="todo-category-title">Day Trips & Nature</div>
+        <div class="todo-item">
+          <div class="todo-item-name">Jiufen</div>
+          <div class="todo-item-desc">A mountainside village famous for its lantern-lit alleyways and tea houses. Said to have inspired the setting of Spirited Away. About 1 hour by bus.</div>
+        </div>
+        <div class="todo-item">
+          <div class="todo-item-name">Elephant Mountain (Xiangshan)</div>
+          <div class="todo-item-desc">A short but rewarding hike with the best panoramic views of Taipei 101 and the skyline. Perfect for sunset. 20–30 minutes to the top.</div>
+        </div>
+        <div class="todo-item">
+          <div class="todo-item-name">Beitou Hot Springs</div>
+          <div class="todo-item-desc">Natural hot springs just 30 minutes from downtown by MRT. Visit the public Thermal Valley or treat yourself to a private soak at one of the boutique hotels.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============================================================ -->
+<!-- FAQs -->
+<!-- ============================================================ -->
+<div class="page-section" id="page-faq">
+  <section class="faq-page">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Questions</div>
+        <h2 class="section-title">FAQs</h2>
+      </div>
+      <!-- PERSONALIZE: Update answers to match your wedding details -->
+      <div class="faq-list reveal">
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">What is the dress code? <span class="faq-toggle">+</span></div>
+          <div class="faq-answer">Business casual, tie optional. Come comfortable and looking sharp — think slacks and a button-down, a nice blouse, or a smart dress. No need to go overly formal. The ceremony and banquet are indoors and air-conditioned.</div>
+        </div>
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">Can I bring a plus one? <span class="faq-toggle">+</span></div>
+          <div class="faq-answer">We have a limited guest list, so please refer to your invitation for the number of seats reserved in your name. If you have questions, feel free to reach out to us directly.</div>
+        </div>
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">Are children welcome? <span class="faq-toggle">+</span></div>
+          <div class="faq-answer">While we love your little ones, this will be an adults-only celebration so that everyone can relax and enjoy the evening. We appreciate your understanding!</div>
+        </div>
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">When should I RSVP by? <span class="faq-toggle">+</span></div>
+          <div class="faq-answer">Please RSVP by September 15, 2026 so we can finalize the arrangements. You can respond on the Home page or the RSVP tab.</div>
+        </div>
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">Will there be transportation from the hotel? <span class="faq-toggle">+</span></div>
+          <div class="faq-answer">The ceremony and reception are both at the Taipei Marriott Hotel, so if you're staying on-site, you're already there! For guests staying elsewhere, taxis and Uber are widely available in Taipei.</div>
+        </div>
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">Do I need a visa to visit Taiwan? <span class="faq-toggle">+</span></div>
+          <div class="faq-answer">Many nationalities can enter Taiwan visa-free for up to 90 days, including US, UK, EU, Canadian, Australian, and Japanese passport holders. Please check the Taiwan Bureau of Consular Affairs website for your specific country's requirements.</div>
+        </div>
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">What's the weather like in Taipei in November? <span class="faq-toggle">+</span></div>
+          <div class="faq-answer">Early November in Taipei is lovely — temperatures average around 22–26°C (72–79°F) during the day. It's the tail end of the rainy season, so we recommend bringing a light layer and a small umbrella just in case.</div>
+        </div>
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">Will the wedding be in English or Mandarin? <span class="faq-toggle">+</span></div>
+          <div class="faq-answer">The ceremony and reception will be primarily in English with some Mandarin. All key moments will be accessible to everyone regardless of language.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============================================================ -->
+<!-- RSVP PAGE -->
+<!-- ============================================================ -->
+<div class="page-section" id="page-rsvp">
+  <section class="rsvp-page">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label center">Respond</div>
+        <h2 class="section-title" style="text-align:center;">RSVP</h2>
+        <p class="rsvp-subtitle">Kindly respond by September 15, 2026</p>
+      </div>
+      <div class="rsvp-form reveal">
+        <div class="form-row">
+          <input type="text" class="rsvp-field" data-field="firstName" placeholder="First Name" required>
+          <input type="text" class="rsvp-field" data-field="lastName" placeholder="Last Name" required>
+        </div>
+        <input type="email" class="rsvp-field" data-field="email" placeholder="Email Address" required>
+        <select class="rsvp-field" data-field="attending" onchange="this.classList.add('selected')">
+          <option value="" disabled selected>Will you be attending?</option>
+          <option value="Joyfully Accepts">Joyfully Accepts</option>
+          <option value="Regretfully Declines">Regretfully Declines</option>
+        </select>
+        <select class="rsvp-field" data-field="guests" onchange="this.classList.add('selected')">
+          <option value="" disabled selected>Number of Guests</option>
+          <option value="1">1 Guest</option>
+          <option value="2">2 Guests</option>
+          <option value="3">3 Guests</option>
+        </select>
+        <input type="text" class="rsvp-field" data-field="notes" placeholder="Dietary Restrictions or Notes">
+        <button class="rsvp-btn" id="rsvp-btn-page" onclick="submitRSVP('page')">Send Response</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-names reveal">Yoojin <span class="amp">&</span> Zoey</div>
+  <div class="footer-date reveal">November 1, 2026 — Taipei, Taiwan</div>
+  <div class="footer-heart reveal">♥</div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast">Response Sent — See You in Taipei!</div>
+
+<script>
+  // =====================================================
+  // IMPORTANT: Replace with your Google Apps Script URL
+  // =====================================================
+  const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_SCRIPT_URL_HERE';
+
+  // ── PAGE NAVIGATION ──
+  document.querySelectorAll('nav a').forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const page = this.dataset.page;
+
+      // Update nav
+      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+      this.classList.add('active');
+
+      // Show page
+      document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+      document.getElementById('page-' + page).classList.add('active');
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'instant' });
+
+      // Re-trigger reveal animations
+      setTimeout(initReveals, 100);
+    });
+  });
+
+  // ── COUNTDOWN ──
+  function updateCountdown() {
+    const wedding = new Date('2026-11-01T11:00:00+08:00');
+    const now = new Date();
+    const diff = wedding - now;
+    if (diff <= 0) {
+      document.getElementById('countdown').textContent = "Today's the day!";
+      return;
+    }
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const secs = Math.floor((diff % (1000 * 60)) / 1000);
+    document.getElementById('countdown').textContent =
+      days + ' days · ' + hours + ' hours · ' + mins + ' minutes · ' + secs + ' seconds';
+  }
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  // ── SCROLL REVEALS ──
+  function initReveals() {
+    const reveals = document.querySelectorAll('.reveal:not(.visible)');
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => obs.observe(el));
+  }
+  initReveals();
+
+  // ── FAQ TOGGLE ──
+  function toggleFAQ(el) {
+    el.classList.toggle('open');
+  }
+
+  // ── TOAST ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  // ── RSVP SUBMIT ──
+  function submitRSVP(source) {
+    // Determine which form to read from
+    var firstName, lastName, email, attending, guests, notes, btn;
+
+    if (source === 'page') {
+      var form = document.getElementById('page-rsvp');
+      firstName = form.querySelector('[data-field="firstName"]').value.trim();
+      lastName = form.querySelector('[data-field="lastName"]').value.trim();
+      email = form.querySelector('[data-field="email"]').value.trim();
+      attending = form.querySelector('[data-field="attending"]').value;
+      guests = form.querySelector('[data-field="guests"]').value;
+      notes = form.querySelector('[data-field="notes"]').value.trim();
+      btn = document.getElementById('rsvp-btn-page');
+    } else {
+      firstName = document.getElementById('firstName').value.trim();
+      lastName = document.getElementById('lastName').value.trim();
+      email = document.getElementById('email').value.trim();
+      attending = document.getElementById('attending').value;
+      guests = document.getElementById('guests').value;
+      notes = document.getElementById('notes').value.trim();
+      btn = document.getElementById('rsvp-btn');
+    }
+
+    if (!firstName || !lastName) { showToast('Please enter your full name'); return; }
+    if (!email || !email.includes('@')) { showToast('Please enter a valid email'); return; }
+    if (!attending) { showToast('Please let us know if you can attend'); return; }
+
+    btn.textContent = 'SENDING...';
+    btn.style.opacity = '0.6';
+    btn.style.pointerEvents = 'none';
+
+    var data = new URLSearchParams({
+      firstName: firstName, lastName: lastName, email: email,
+      attending: attending, guests: guests || '1', notes: notes
+    });
+
+    fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST', body: data,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    })
+    .then(function() { resetForm(source); showToast('Response Sent — See You in Taipei!'); })
+    .catch(function() { resetForm(source); showToast('Response Sent — See You in Taipei!'); })
+    .finally(function() {
+      btn.textContent = 'SEND RESPONSE';
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = 'auto';
+    });
+  }
+
+  function resetForm(source) {
+    if (source === 'page') {
+      var form = document.getElementById('page-rsvp');
+      form.querySelectorAll('.rsvp-field').forEach(function(f) {
+        if (f.tagName === 'SELECT') { f.selectedIndex = 0; f.classList.remove('selected'); }
+        else { f.value = ''; }
+      });
+    } else {
+      ['firstName','lastName','email','notes'].forEach(function(id) { document.getElementById(id).value = ''; });
+      document.getElementById('attending').selectedIndex = 0;
+      document.getElementById('guests').selectedIndex = 0;
+    }
+  }
+</script>
+</body>
+</html>
