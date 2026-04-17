@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; frame-src https://www.google.com; connect-src https://script.google.com https://*.googleusercontent.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://script.google.com">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="robots" content="noindex, nofollow">
 <title>Yoojin & Zoey — 11.01.2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
 <style>
@@ -671,9 +674,137 @@
     background: var(--gold); color: var(--black);
   }
 
+  /* ── PASSWORD GATE ── */
+  body.locked { overflow: hidden; }
+  body.locked > :not(#gate) { visibility: hidden; }
+  #gate {
+    position: fixed; inset: 0; z-index: 9999;
+    display: none;
+    align-items: center; justify-content: center;
+    background: var(--black);
+    padding: 2rem;
+  }
+  body.locked #gate { display: flex; }
+  .gate-card {
+    width: 100%; max-width: 420px;
+    text-align: center;
+    opacity: 0; transform: translateY(20px);
+    animation: gateFadeIn 0.8s ease 0.1s forwards;
+  }
+  @keyframes gateFadeIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .gate-monogram {
+    font-family: var(--display); font-weight: 300;
+    font-size: 3rem; line-height: 1;
+    color: var(--white); margin-bottom: 0.25rem;
+  }
+  .gate-monogram .amp {
+    font-family: var(--serif); font-style: italic;
+    color: var(--gold); font-size: 0.8em;
+    margin: 0 0.1em;
+  }
+  .gate-date {
+    font-family: var(--sans); font-weight: 300; font-size: 0.65rem;
+    letter-spacing: 0.45em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 2.5rem;
+  }
+  .gate-label {
+    font-family: var(--sans); font-weight: 500; font-size: 0.65rem;
+    letter-spacing: 0.4em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 1rem;
+  }
+  .gate-title {
+    font-family: var(--display); font-weight: 300;
+    font-size: 1.8rem; line-height: 1.3;
+    color: var(--white); margin-bottom: 0.75rem;
+  }
+  .gate-sub {
+    font-family: var(--sans); font-weight: 300; font-size: 0.85rem;
+    color: var(--muted); margin-bottom: 2rem; line-height: 1.6;
+  }
+  .gate-form {
+    display: flex; flex-direction: column; gap: 1rem;
+  }
+  .gate-input {
+    width: 100%; padding: 1rem 1.25rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--white); font-family: var(--sans);
+    font-weight: 300; font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    outline: none; text-align: center;
+    transition: border-color 0.3s, background 0.3s;
+  }
+  .gate-input:focus {
+    border-color: var(--gold);
+    background: rgba(201,169,110,0.05);
+  }
+  .gate-input::placeholder { color: var(--muted); letter-spacing: 0.2em; }
+  .gate-btn {
+    padding: 1.1rem 2rem;
+    background: var(--gold); color: var(--black);
+    border: none; font-family: var(--sans); font-weight: 500;
+    font-size: 0.7rem; letter-spacing: 0.35em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.4s;
+  }
+  .gate-btn:hover:not(:disabled) {
+    background: var(--white);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(201,169,110,0.3);
+  }
+  .gate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .gate-error {
+    min-height: 1.2rem;
+    font-family: var(--sans); font-weight: 400; font-size: 0.75rem;
+    letter-spacing: 0.12em; color: #d98585;
+    margin-top: 0.25rem;
+  }
+  .gate-lang {
+    margin-top: 2.5rem;
+    display: flex; justify-content: center; gap: 0;
+    border: 1px solid rgba(248,246,243,0.15); border-radius: 3px;
+    overflow: hidden; width: fit-content; margin-left: auto; margin-right: auto;
+  }
+  .gate-lang button {
+    padding: 0.35rem 0.8rem;
+    font-family: var(--sans); font-size: 0.6rem; font-weight: 500;
+    background: transparent; border: none;
+    color: var(--muted); cursor: pointer;
+    border-right: 1px solid rgba(248,246,243,0.15);
+    transition: all 0.3s;
+  }
+  .gate-lang button:last-child { border-right: none; }
+  .gate-lang button:hover { color: var(--white); }
+  .gate-lang button.active { background: var(--gold); color: var(--black); }
+
 </style>
 </head>
-<body>
+<body class="locked">
+
+<!-- PASSWORD GATE -->
+<div id="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+  <div class="gate-card">
+    <div class="gate-monogram">Y <span class="amp">&</span> Z</div>
+    <div class="gate-date" id="gate-date">November 1, 2026</div>
+    <div class="gate-label" id="gate-label">Private Celebration</div>
+    <h1 class="gate-title" id="gate-title">Please enter the password</h1>
+    <p class="gate-sub" id="gate-sub">This website is reserved for our wedding guests. The password was included in your invitation.</p>
+    <form class="gate-form" id="gate-form" autocomplete="off" novalidate>
+      <input type="password" id="gate-input" class="gate-input"
+             placeholder="••••••••" autocomplete="current-password"
+             autocapitalize="off" autocorrect="off" spellcheck="false"
+             maxlength="128" required aria-label="Password">
+      <button type="submit" id="gate-submit" class="gate-btn">Enter</button>
+      <div class="gate-error" id="gate-error" role="alert" aria-live="polite"></div>
+    </form>
+    <div class="gate-lang" role="group" aria-label="Language">
+      <button type="button" class="active" data-gate-lang="en">EN</button>
+      <button type="button" data-gate-lang="ko">한국어</button>
+      <button type="button" data-gate-lang="zh">中文</button>
+    </div>
+  </div>
+</div>
 
 <!-- NAV -->
 <nav id="main-nav">
@@ -755,10 +886,10 @@
       </div>
       <div class="rsvp-form reveal">
         <div class="form-row">
-          <input type="text" id="firstName" data-i18n-ph="rsvp.firstName" placeholder="First Name" required>
-          <input type="text" id="lastName" data-i18n-ph="rsvp.lastName" placeholder="Last Name" required>
+          <input type="text" id="firstName" data-i18n-ph="rsvp.firstName" placeholder="First Name" autocomplete="given-name" maxlength="60" required>
+          <input type="text" id="lastName" data-i18n-ph="rsvp.lastName" placeholder="Last Name" autocomplete="family-name" maxlength="60" required>
         </div>
-        <input type="email" id="email" data-i18n-ph="rsvp.email" placeholder="Email Address" required>
+        <input type="email" id="email" data-i18n-ph="rsvp.email" placeholder="Email Address" autocomplete="email" maxlength="254" required>
         <select id="attending" onchange="this.classList.add('selected')">
           <option value="" disabled selected data-i18n="rsvp.attending">Will you be attending?</option>
           <option value="Joyfully Accepts" data-i18n="rsvp.yes">Joyfully Accepts</option>
@@ -770,7 +901,7 @@
           <option value="2" data-i18n="rsvp.g2">2 Guests</option>
           <option value="3" data-i18n="rsvp.g3">3 Guests</option>
         </select>
-        <input type="text" id="notes" data-i18n-ph="rsvp.notes" placeholder="Dietary Restrictions or Notes">
+        <input type="text" id="notes" data-i18n-ph="rsvp.notes" placeholder="Dietary Restrictions or Notes" maxlength="500">
         <button class="rsvp-btn" id="rsvp-btn" onclick="submitRSVP()" data-i18n="rsvp.send">Send Response</button>
       </div>
     </div>
@@ -948,7 +1079,7 @@
           <div class="travel-card-icon">📋</div>
           <div class="travel-card-title" data-i18n="travel.know">Good to Know</div>
           <div class="travel-card-text" data-i18n-html="travel.knowText">
-            <strong>Visa:</strong> Many nationalities can enter Taiwan visa-free for up to 90 days. Check <a href="https://www.boca.gov.tw" target="_blank">BOCA</a> for your country's requirements.<br><br>
+            <strong>Visa:</strong> Many nationalities can enter Taiwan visa-free for up to 90 days. Check <a href="https://www.boca.gov.tw" target="_blank" rel="noopener noreferrer">BOCA</a> for your country's requirements.<br><br>
             <strong>Currency:</strong> New Taiwan Dollar (NT$). Cards are widely accepted, but carry some cash for night markets and small shops.<br><br>
             <strong>Language:</strong> Mandarin Chinese is the official language. English is common in hotels, MRT stations, and tourist areas.
           </div>
@@ -1115,10 +1246,10 @@
       </div>
       <div class="rsvp-form reveal">
         <div class="form-row">
-          <input type="text" class="rsvp-field" data-field="firstName" data-i18n-ph="rsvp.firstName" placeholder="First Name" required>
-          <input type="text" class="rsvp-field" data-field="lastName" data-i18n-ph="rsvp.lastName" placeholder="Last Name" required>
+          <input type="text" class="rsvp-field" data-field="firstName" data-i18n-ph="rsvp.firstName" placeholder="First Name" autocomplete="given-name" maxlength="60" required>
+          <input type="text" class="rsvp-field" data-field="lastName" data-i18n-ph="rsvp.lastName" placeholder="Last Name" autocomplete="family-name" maxlength="60" required>
         </div>
-        <input type="email" class="rsvp-field" data-field="email" data-i18n-ph="rsvp.email" placeholder="Email Address" required>
+        <input type="email" class="rsvp-field" data-field="email" data-i18n-ph="rsvp.email" placeholder="Email Address" autocomplete="email" maxlength="254" required>
         <select class="rsvp-field" data-field="attending" onchange="this.classList.add('selected')">
           <option value="" disabled selected data-i18n="rsvp.attending">Will you be attending?</option>
           <option value="Joyfully Accepts" data-i18n="rsvp.yes">Joyfully Accepts</option>
@@ -1130,7 +1261,7 @@
           <option value="2" data-i18n="rsvp.g2">2 Guests</option>
           <option value="3" data-i18n="rsvp.g3">3 Guests</option>
         </select>
-        <input type="text" class="rsvp-field" data-field="notes" data-i18n-ph="rsvp.notes" placeholder="Dietary Restrictions or Notes">
+        <input type="text" class="rsvp-field" data-field="notes" data-i18n-ph="rsvp.notes" placeholder="Dietary Restrictions or Notes" maxlength="500">
         <button class="rsvp-btn" id="rsvp-btn-page" onclick="submitRSVP('page')" data-i18n="rsvp.send">Send Response</button>
       </div>
     </div>
@@ -1148,6 +1279,193 @@
 <div class="toast" id="toast">Response Sent — See You in Taipei!</div>
 
 <script>
+  // =====================================================
+  // PASSWORD GATE
+  // -----------------------------------------------------
+  // To change the password:
+  //   1) Pick a new password.
+  //   2) Generate a new salt + PBKDF2 hash, e.g. with:
+  //        python3 -c "import hashlib,os; s=os.urandom(16); \
+  //          h=hashlib.pbkdf2_hmac('sha256', b'YOUR_PASSWORD', s, 200000); \
+  //          print('salt:',s.hex()); print('hash:',h.hex())"
+  //   3) Paste the hex values below.
+  //   Default password: yoojin-zoey-2026
+  // =====================================================
+  const GATE = {
+    saltHex: '8f41327e81cca100cdc31210b928f1dd',
+    hashHex: '45384abde42d68b688075cdb89ebd02849dd905e3ddcd98abe3058ffb1f8454b',
+    iterations: 200000,
+    sessionKey: 'yz-wedding-unlock',
+    sessionValue: '1'
+  };
+
+  var GATE_I18N = {
+    en: {
+      label:'Private Celebration', date:'November 1, 2026',
+      title:'Please enter the password',
+      sub:'This website is reserved for our wedding guests. The password was included in your invitation.',
+      placeholder:'Password', submit:'Enter',
+      wrong:'Incorrect password. Please try again.',
+      empty:'Please enter the password.',
+      locked:'Too many attempts. Please wait a moment and try again.'
+    },
+    ko: {
+      label:'비공개 초대', date:'2026년 11월 1일',
+      title:'비밀번호를 입력해 주세요',
+      sub:'이 웹사이트는 저희 결혼식 하객분들만을 위한 공간입니다. 비밀번호는 청첩장에 안내되어 있습니다.',
+      placeholder:'비밀번호', submit:'입장',
+      wrong:'비밀번호가 올바르지 않습니다. 다시 시도해 주세요.',
+      empty:'비밀번호를 입력해 주세요.',
+      locked:'시도 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요.'
+    },
+    zh: {
+      label:'私人婚禮', date:'2026年11月1日',
+      title:'請輸入密碼',
+      sub:'本網站僅供婚禮賓客瀏覽。密碼已包含在您的邀請函中。',
+      placeholder:'密碼', submit:'進入',
+      wrong:'密碼錯誤，請再試一次。',
+      empty:'請輸入密碼。',
+      locked:'嘗試次數過多，請稍候再試。'
+    }
+  };
+
+  function hexToBytes(hex) {
+    var out = new Uint8Array(hex.length / 2);
+    for (var i = 0; i < out.length; i++) {
+      out[i] = parseInt(hex.substr(i * 2, 2), 16);
+    }
+    return out;
+  }
+
+  function bytesToHex(bytes) {
+    var arr = new Uint8Array(bytes);
+    var s = '';
+    for (var i = 0; i < arr.length; i++) {
+      s += arr[i].toString(16).padStart(2, '0');
+    }
+    return s;
+  }
+
+  // Constant-time comparison of two hex strings of equal length.
+  function timingSafeEqual(aHex, bHex) {
+    if (aHex.length !== bHex.length) return false;
+    var diff = 0;
+    for (var i = 0; i < aHex.length; i++) {
+      diff |= aHex.charCodeAt(i) ^ bHex.charCodeAt(i);
+    }
+    return diff === 0;
+  }
+
+  async function verifyPassword(pw) {
+    if (!window.crypto || !window.crypto.subtle) {
+      throw new Error('crypto-unavailable');
+    }
+    var enc = new TextEncoder();
+    var keyMaterial = await crypto.subtle.importKey(
+      'raw', enc.encode(pw), { name: 'PBKDF2' }, false, ['deriveBits']
+    );
+    var bits = await crypto.subtle.deriveBits(
+      {
+        name: 'PBKDF2',
+        salt: hexToBytes(GATE.saltHex),
+        iterations: GATE.iterations,
+        hash: 'SHA-256'
+      },
+      keyMaterial,
+      256
+    );
+    return timingSafeEqual(bytesToHex(bits), GATE.hashHex);
+  }
+
+  function setGateLang(lang) {
+    if (!GATE_I18N[lang]) lang = 'en';
+    var s = GATE_I18N[lang];
+    document.getElementById('gate-date').textContent = s.date;
+    document.getElementById('gate-label').textContent = s.label;
+    document.getElementById('gate-title').textContent = s.title;
+    document.getElementById('gate-sub').textContent = s.sub;
+    document.getElementById('gate-input').placeholder = s.placeholder;
+    document.getElementById('gate-submit').textContent = s.submit;
+    document.querySelectorAll('[data-gate-lang]').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.gateLang === lang);
+    });
+    document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : lang;
+    window.__gateLang = lang;
+  }
+
+  function unlockSite() {
+    try { sessionStorage.setItem(GATE.sessionKey, GATE.sessionValue); } catch (e) {}
+    document.body.classList.remove('locked');
+    // Sync language toggle with main site after unlock.
+    var lang = window.__gateLang || 'en';
+    if (typeof setLang === 'function' && lang !== 'en') {
+      try { setLang(lang); } catch (e) {}
+    }
+  }
+
+  (function initGate() {
+    // Detect preferred language from browser.
+    var nav = (navigator.language || 'en').toLowerCase();
+    var preferred = nav.indexOf('ko') === 0 ? 'ko'
+                  : (nav.indexOf('zh') === 0 ? 'zh' : 'en');
+    setGateLang(preferred);
+
+    // If already unlocked this session, reveal immediately.
+    try {
+      if (sessionStorage.getItem(GATE.sessionKey) === GATE.sessionValue) {
+        document.body.classList.remove('locked');
+        return;
+      }
+    } catch (e) { /* storage may be blocked; require password */ }
+
+    var form = document.getElementById('gate-form');
+    var input = document.getElementById('gate-input');
+    var btn = document.getElementById('gate-submit');
+    var err = document.getElementById('gate-error');
+    var failures = 0;
+    var locked = false;
+
+    document.querySelectorAll('[data-gate-lang]').forEach(function(b) {
+      b.addEventListener('click', function() { setGateLang(b.dataset.gateLang); err.textContent = ''; });
+    });
+
+    // Focus after the fade-in animation settles.
+    setTimeout(function() { try { input.focus(); } catch (e) {} }, 900);
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      if (locked) return;
+      var lang = window.__gateLang || 'en';
+      var s = GATE_I18N[lang];
+      var pw = input.value;
+      if (!pw) { err.textContent = s.empty; return; }
+      btn.disabled = true;
+      err.textContent = '';
+      try {
+        var ok = await verifyPassword(pw);
+        if (ok) {
+          unlockSite();
+          return;
+        }
+        failures++;
+        input.value = '';
+        err.textContent = s.wrong;
+        // Exponential back-off on failed attempts (capped at 60s).
+        if (failures >= 3) {
+          locked = true;
+          var wait = Math.min(60, Math.pow(2, failures - 2)) * 1000;
+          err.textContent = s.locked;
+          setTimeout(function() { locked = false; btn.disabled = false; err.textContent = ''; }, wait);
+        } else {
+          btn.disabled = false;
+        }
+      } catch (ex) {
+        err.textContent = s.wrong;
+        btn.disabled = false;
+      }
+    });
+  })();
+
   // =====================================================
   // IMPORTANT: Replace with your Google Apps Script URL
   // =====================================================
@@ -1193,7 +1511,7 @@
       'travel.airport':'Airport to Hotel',
       'travel.airportText':'<strong>Taoyuan Airport MRT</strong> — Take the Express train to Taipei Main Station (~35 min, ~NT$160), then transfer to the MRT Red Line to Jiannan Road Station. The hotel is a short walk away.<br><br><strong>Taxi / Uber</strong> — A taxi from Taoyuan Airport costs approximately NT$1,200–1,500 (~$37–47 USD). Uber is also widely available.',
       'travel.know':'Good to Know',
-      'travel.knowText':'<strong>Visa:</strong> Many nationalities can enter Taiwan visa-free for up to 90 days. Check <a href="https://www.boca.gov.tw" target="_blank">BOCA</a> for your country\'s requirements.<br><br><strong>Currency:</strong> New Taiwan Dollar (NT$). Cards are widely accepted, but carry some cash for night markets and small shops.<br><br><strong>Language:</strong> Mandarin Chinese is the official language. English is common in hotels, MRT stations, and tourist areas.',
+      'travel.knowText':'<strong>Visa:</strong> Many nationalities can enter Taiwan visa-free for up to 90 days. Check <a href="https://www.boca.gov.tw" target="_blank" rel="noopener noreferrer">BOCA</a> for your country\'s requirements.<br><br><strong>Currency:</strong> New Taiwan Dollar (NT$). Cards are widely accepted, but carry some cash for night markets and small shops.<br><br><strong>Language:</strong> Mandarin Chinese is the official language. English is common in hotels, MRT stations, and tourist areas.',
       'gallery.label':'Gallery','gallery.title':'Our Moments',
       'gallery.note':'More photos coming soon! We\'ll also share a gallery link after the wedding so you can relive all the memories.',
       'todo.label':'Explore','todo.title':'Things to Do in Taipei',
@@ -1221,6 +1539,8 @@
       'footer.date':'November 1, 2026 — Taipei, Taiwan',
       'toast.sent':'Response Sent — See You in Taipei!','toast.name':'Please enter your full name',
       'toast.email':'Please enter a valid email','toast.attend':'Please let us know if you can attend',
+      'toast.sendErr':'Could not send. Please check your connection and try again.',
+      'toast.configErr':'RSVP is not configured yet. Please contact us directly.',
       'countdown.days':'days','countdown.hours':'hours','countdown.min':'minutes','countdown.sec':'seconds','countdown.today':'Today\'s the day!'
     },
     ko: {
@@ -1260,7 +1580,7 @@
       'travel.airport':'공항에서 호텔까지',
       'travel.airportText':'<strong>타오위안 공항철도 (MRT)</strong> — 익스프레스 열차로 타이베이 메인 스테이션까지 약 35분 (약 NT$160), 이후 MRT 레드 라인으로 환승하여 젠난 로드역에서 하차. 호텔은 도보 거리입니다.<br><br><strong>택시 / 우버</strong> — 타오위안 공항에서 택시 요금은 약 NT$1,200–1,500 (약 $37–47 USD)입니다. 우버도 이용 가능합니다.',
       'travel.know':'알아두면 좋은 정보',
-      'travel.knowText':'<strong>비자:</strong> 많은 국적의 분들이 최대 90일까지 무비자로 대만에 입국할 수 있습니다. <a href="https://www.boca.gov.tw" target="_blank">BOCA</a>에서 본인 국가의 요건을 확인하세요.<br><br><strong>통화:</strong> 신대만달러 (NT$). 카드 사용이 널리 가능하지만, 야시장이나 소규모 상점을 위해 현금을 준비하시는 것이 좋습니다.<br><br><strong>언어:</strong> 공용어는 중국어(만다린)입니다. 호텔, MRT 역, 관광지에서는 영어가 통합니다.',
+      'travel.knowText':'<strong>비자:</strong> 많은 국적의 분들이 최대 90일까지 무비자로 대만에 입국할 수 있습니다. <a href="https://www.boca.gov.tw" target="_blank" rel="noopener noreferrer">BOCA</a>에서 본인 국가의 요건을 확인하세요.<br><br><strong>통화:</strong> 신대만달러 (NT$). 카드 사용이 널리 가능하지만, 야시장이나 소규모 상점을 위해 현금을 준비하시는 것이 좋습니다.<br><br><strong>언어:</strong> 공용어는 중국어(만다린)입니다. 호텔, MRT 역, 관광지에서는 영어가 통합니다.',
       'gallery.label':'갤러리','gallery.title':'우리의 순간들',
       'gallery.note':'더 많은 사진이 곧 올라올 예정입니다! 결혼식 후 갤러리 링크도 공유할 예정이니 모든 추억을 다시 즐겨보세요.',
       'todo.label':'관광','todo.title':'타이베이 관광 명소',
@@ -1288,6 +1608,8 @@
       'footer.date':'2026년 11월 1일 — 대만 타이베이',
       'toast.sent':'회신 완료 — 타이베이에서 만나요!','toast.name':'성명을 입력해 주세요',
       'toast.email':'유효한 이메일을 입력해 주세요','toast.attend':'참석 여부를 알려주세요',
+      'toast.sendErr':'전송에 실패했습니다. 연결 상태를 확인하고 다시 시도해 주세요.',
+      'toast.configErr':'RSVP 설정이 완료되지 않았습니다. 직접 연락해 주세요.',
       'countdown.days':'일','countdown.hours':'시간','countdown.min':'분','countdown.sec':'초','countdown.today':'오늘이 그 날입니다!'
     },
     zh: {
@@ -1327,7 +1649,7 @@
       'travel.airport':'機場到飯店',
       'travel.airportText':'<strong>桃園機場捷運</strong> — 搭乘直達車至台北車站（約35分鐘，約NT$160），再轉乘捷運紅線至劍南路站。飯店步行即可到達。<br><br><strong>計程車 / Uber</strong> — 從桃園機場搭計程車約NT$1,200–1,500（約$37–47美元）。Uber也很普遍。',
       'travel.know':'實用資訊',
-      'travel.knowText':'<strong>簽證：</strong>許多國籍可免簽入境台灣，最長停留90天。請至<a href="https://www.boca.gov.tw" target="_blank">外交部領事事務局</a>查詢您的國家要求。<br><br><strong>貨幣：</strong>新台幣 (NT$)。信用卡普遍接受，但建議攜帶一些現金以備夜市和小商店使用。<br><br><strong>語言：</strong>官方語言為中文（普通話）。飯店、捷運站和觀光區通常可使用英語。',
+      'travel.knowText':'<strong>簽證：</strong>許多國籍可免簽入境台灣，最長停留90天。請至<a href="https://www.boca.gov.tw" target="_blank" rel="noopener noreferrer">外交部領事事務局</a>查詢您的國家要求。<br><br><strong>貨幣：</strong>新台幣 (NT$)。信用卡普遍接受，但建議攜帶一些現金以備夜市和小商店使用。<br><br><strong>語言：</strong>官方語言為中文（普通話）。飯店、捷運站和觀光區通常可使用英語。',
       'gallery.label':'相簿','gallery.title':'我們的時光',
       'gallery.note':'更多照片即將上線！婚禮後我們也會分享相簿連結，讓您重溫所有美好回憶。',
       'todo.label':'探索','todo.title':'台北景點推薦',
@@ -1355,6 +1677,8 @@
       'footer.date':'2026年11月1日 — 台灣 台北',
       'toast.sent':'回覆已送出 — 台北見！','toast.name':'請輸入您的姓名',
       'toast.email':'請輸入有效的電子郵件','toast.attend':'請告知我們您是否能出席',
+      'toast.sendErr':'傳送失敗，請檢查網路連線後再試一次。',
+      'toast.configErr':'RSVP 尚未設定，請直接聯繫我們。',
       'countdown.days':'天','countdown.hours':'小時','countdown.min':'分鐘','countdown.sec':'秒','countdown.today':'今天就是大日子！'
     }
   };
@@ -1468,9 +1792,19 @@
       notes = document.getElementById('notes').value.trim();
       btn = document.getElementById('rsvp-btn');
     }
+    // RFC 5322-lite email check: non-space local@domain.tld
+    var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254;
     if (!firstName || !lastName) { showToast(L['toast.name']); return; }
-    if (!email || !email.includes('@')) { showToast(L['toast.email']); return; }
+    if (!email || !emailOk) { showToast(L['toast.email']); return; }
     if (!attending) { showToast(L['toast.attend']); return; }
+    // Hard-cap lengths as defence-in-depth against pasted oversize input.
+    firstName = firstName.slice(0, 60);
+    lastName  = lastName.slice(0, 60);
+    notes     = notes.slice(0, 500);
+    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.indexOf('YOUR_GOOGLE_SCRIPT_URL') === 0) {
+      showToast(L['toast.configErr'] || 'RSVP endpoint not configured');
+      return;
+    }
     btn.textContent = 'SENDING...';
     btn.style.opacity = '0.6'; btn.style.pointerEvents = 'none';
     var data = new URLSearchParams({
@@ -1478,8 +1812,15 @@
       attending:attending,guests:guests||'1',notes:notes
     });
     fetch(GOOGLE_SCRIPT_URL,{method:'POST',body:data,headers:{'Content-Type':'application/x-www-form-urlencoded'}})
-    .then(function(){resetForm(source);showToast(L['toast.sent']);})
-    .catch(function(){resetForm(source);showToast(L['toast.sent']);})
+    .then(function(res){
+      // Apps Script returns opaque responses; treat network success as sent.
+      resetForm(source);
+      showToast(L['toast.sent']);
+    })
+    .catch(function(){
+      // Network failure: surface a real error so the guest can retry.
+      showToast(L['toast.sendErr'] || 'Could not send. Please try again.');
+    })
     .finally(function(){
       btn.textContent = L['rsvp.send'] || 'Send Response';
       btn.style.opacity='1';btn.style.pointerEvents='auto';
