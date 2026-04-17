@@ -244,27 +244,94 @@ const runtime = String.raw`
     setTimeout(function() { t.classList.remove('show'); }, 3500);
   }
 
-  window.submitRSVP = function(source) {
-    var firstName, lastName, email, attending, guests, notes, btn;
-    var L = T[currentLang];
+  // ── RSVP EDIT-MODE STATE ──
+  // If the guest opens "?rsvp=TOKEN" (from their confirmation email) we fetch
+  // their existing response, prefill both forms, and switch the submit action
+  // from "create" to "update".
+  var rsvpEditToken = null;
+
+  function getFormFields(source) {
     if (source === 'page') {
       var form = document.getElementById('page-rsvp');
-      firstName = form.querySelector('[data-field="firstName"]').value.trim();
-      lastName = form.querySelector('[data-field="lastName"]').value.trim();
-      email = form.querySelector('[data-field="email"]').value.trim();
-      attending = form.querySelector('[data-field="attending"]').value;
-      guests = form.querySelector('[data-field="guests"]').value;
-      notes = form.querySelector('[data-field="notes"]').value.trim();
-      btn = document.getElementById('rsvp-btn-page');
-    } else {
-      firstName = document.getElementById('firstName').value.trim();
-      lastName = document.getElementById('lastName').value.trim();
-      email = document.getElementById('email').value.trim();
-      attending = document.getElementById('attending').value;
-      guests = document.getElementById('guests').value;
-      notes = document.getElementById('notes').value.trim();
-      btn = document.getElementById('rsvp-btn');
+      return {
+        firstName: form.querySelector('[data-field="firstName"]'),
+        lastName:  form.querySelector('[data-field="lastName"]'),
+        email:     form.querySelector('[data-field="email"]'),
+        attending: form.querySelector('[data-field="attending"]'),
+        guests:    form.querySelector('[data-field="guests"]'),
+        notes:     form.querySelector('[data-field="notes"]')
+      };
     }
+    return {
+      firstName: document.getElementById('firstName'),
+      lastName:  document.getElementById('lastName'),
+      email:     document.getElementById('email'),
+      attending: document.getElementById('attending'),
+      guests:    document.getElementById('guests'),
+      notes:     document.getElementById('notes')
+    };
+  }
+
+  function applyRSVPButtonLabels() {
+    var key = rsvpEditToken ? 'rsvp.update' : 'rsvp.send';
+    ['rsvp-btn', 'rsvp-btn-page'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.setAttribute('data-i18n', key);
+      el.textContent = (T && T[currentLang] && T[currentLang][key])
+                     || (rsvpEditToken ? 'Update Response' : 'Send Response');
+    });
+  }
+
+  function setRSVPEditBannerVisible(visible) {
+    document.querySelectorAll('[data-rsvp-banner]').forEach(function(el) {
+      if (visible) el.removeAttribute('hidden'); else el.setAttribute('hidden', '');
+    });
+  }
+
+  function prefillRSVP(rsvp) {
+    ['home','page'].forEach(function(src) {
+      var f = getFormFields(src);
+      if (!f.firstName) return;
+      f.firstName.value = rsvp.firstName || '';
+      f.lastName.value  = rsvp.lastName  || '';
+      f.email.value     = rsvp.email     || '';
+      if (rsvp.attending) { f.attending.value = rsvp.attending; f.attending.classList.add('selected'); }
+      var g = String(rsvp.guests || 1);
+      if (g === '1' || g === '2') { f.guests.value = g; f.guests.classList.add('selected'); }
+      f.notes.value = rsvp.notes || '';
+    });
+  }
+
+  async function initRSVPEditMode() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var token = params.get('rsvp');
+      if (!token || !/^[a-f0-9]{32}$/i.test(token)) return;
+      if (!window.GOOGLE_SCRIPT_URL || window.GOOGLE_SCRIPT_URL.indexOf('YOUR_GOOGLE_SCRIPT_URL') === 0) return;
+      var url = window.GOOGLE_SCRIPT_URL
+              + (window.GOOGLE_SCRIPT_URL.indexOf('?') >= 0 ? '&' : '?')
+              + 'action=get&token=' + encodeURIComponent(token);
+      var res = await fetch(url, { method: 'GET' });
+      var body = await res.json();
+      if (!body || !body.ok || !body.rsvp) return;
+      rsvpEditToken = token;
+      prefillRSVP(body.rsvp);
+      setRSVPEditBannerVisible(true);
+      applyRSVPButtonLabels();
+    } catch (e) { /* offline / bad response → stay in create mode */ }
+  }
+
+  window.submitRSVP = function(source) {
+    var L = T[currentLang];
+    var f = getFormFields(source);
+    var btn = document.getElementById(source === 'page' ? 'rsvp-btn-page' : 'rsvp-btn');
+    var firstName = f.firstName.value.trim();
+    var lastName  = f.lastName.value.trim();
+    var email     = f.email.value.trim();
+    var attending = f.attending.value;
+    var guests    = f.guests.value;
+    var notes     = f.notes.value.trim();
     var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254;
     if (!firstName || !lastName) { showToast(L['toast.name']); return; }
     if (!email || !emailOk) { showToast(L['toast.email']); return; }
@@ -272,22 +339,50 @@ const runtime = String.raw`
     firstName = firstName.slice(0, 60);
     lastName  = lastName.slice(0, 60);
     notes     = notes.slice(0, 500);
+    if (guests !== '1' && guests !== '2') guests = '1';
     var url = window.GOOGLE_SCRIPT_URL || 'YOUR_GOOGLE_SCRIPT_URL_HERE';
     if (!url || url.indexOf('YOUR_GOOGLE_SCRIPT_URL') === 0) {
       showToast(L['toast.configErr'] || 'RSVP endpoint not configured');
       return;
     }
+    var isUpdate = !!rsvpEditToken;
+    var payload = {
+      action: isUpdate ? 'update' : 'create',
+      firstName: firstName, lastName: lastName, email: email,
+      attending: attending, guests: guests, notes: notes
+    };
+    if (isUpdate) payload.token = rsvpEditToken;
     btn.textContent = 'SENDING...';
     btn.style.opacity = '0.6'; btn.style.pointerEvents = 'none';
-    var data = new URLSearchParams({
-      firstName:firstName,lastName:lastName,email:email,
-      attending:attending,guests:guests||'1',notes:notes
-    });
-    fetch(url,{method:'POST',body:data,headers:{'Content-Type':'application/x-www-form-urlencoded'}})
-      .then(function(){ resetForm(source); showToast(L['toast.sent']); })
+    fetch(url, {
+      method: 'POST',
+      body: new URLSearchParams(payload),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    })
+      .then(function(res){ return res.json().catch(function(){ return { ok: true }; }); })
+      .then(function(body){
+        if (!body || body.ok === false) {
+          showToast(L['toast.sendErr'] || 'Could not send. Please try again.');
+          return;
+        }
+        if (isUpdate) {
+          showToast(L['toast.updated'] || 'RSVP updated.');
+        } else {
+          // Backend returns a token → keep the guest in edit mode so a second
+          // submit becomes an update instead of a duplicate row.
+          if (body.token && /^[a-f0-9]{32}$/i.test(body.token)) {
+            rsvpEditToken = body.token;
+            setRSVPEditBannerVisible(true);
+            applyRSVPButtonLabels();
+          } else {
+            resetForm(source);
+          }
+          showToast(L['toast.sent']);
+        }
+      })
       .catch(function(){ showToast(L['toast.sendErr'] || 'Could not send. Please try again.'); })
       .finally(function(){
-        btn.textContent = L['rsvp.send'] || 'Send Response';
+        applyRSVPButtonLabels();
         btn.style.opacity='1'; btn.style.pointerEvents='auto';
       });
   };
@@ -338,9 +433,12 @@ const runtime = String.raw`
     // Apply preferred language if the gate set one.
     var lang = window.__gateLang || 'en';
     window.setLang(lang);
+    applyRSVPButtonLabels();
     updateCountdown();
     setInterval(updateCountdown, 1000);
     initReveals();
+    // If the guest arrived via an edit link, prefill their existing RSVP.
+    initRSVPEditMode();
   }
 
   // ── gate form wiring ──
