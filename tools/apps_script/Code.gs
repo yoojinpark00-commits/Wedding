@@ -310,22 +310,26 @@ function esc_(s) {
 }
 
 // Build a table-based HTML email with inline styles, matching the site's
-// black/gold/cream aesthetic. Inline everything — most email clients strip
-// <style> blocks (Gmail's web client preserves them, but Outlook/Yahoo/etc
-// do not), so every rule lives on its element.
+// editorial black/gold/cream aesthetic. Inline everything — most email
+// clients strip <style> blocks (Gmail's web client preserves them, but
+// Outlook/Yahoo/etc do not), so every rule lives on its element.
 function buildConfirmationHtml_(rec, editUrl, updateMode, attending, intro) {
   var eyebrow = updateMode ? 'RSVP Updated' : (attending ? 'RSVP Confirmed' : 'Response Received');
   var heading = updateMode
     ? 'Your response has been updated.'
     : (attending ? 'Thank you for your RSVP.' : 'Thank you for letting us know.');
 
+  // Reusable decorative hairline — used between eyebrow/heading, CTA, footer.
+  var hairline = '<div style="width:24px;height:1px;background:#c9a96e;margin:0 auto;line-height:1px;font-size:0;">&nbsp;</div>';
+
+  // Editorial listing: each field is two stacked rows — small-caps sans-
+  // serif label, then italic serif value with a 1px bottom rule. No column
+  // widths, no heavy borders.
   var rows = '';
   function row(label, value) {
     rows +=
-      '<tr>' +
-        '<td style="padding:14px 0 14px 0;font-family:Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:0.22em;color:#7a7670;text-transform:uppercase;width:120px;border-bottom:1px solid #f0ece5;vertical-align:top;">' + esc_(label) + '</td>' +
-        '<td style="padding:14px 0 14px 0;font-family:Georgia,serif;font-size:15px;color:#0a0a0a;line-height:1.5;border-bottom:1px solid #f0ece5;">' + value + '</td>' +
-      '</tr>';
+      '<tr><td style="padding:18px 0 6px 0;font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:0.4em;color:#7a7670;text-transform:uppercase;">' + esc_(label) + '</td></tr>' +
+      '<tr><td style="padding:0 0 18px 0;font-family:Georgia,serif;font-style:italic;font-weight:400;font-size:19px;line-height:1.4;color:#0a0a0a;border-bottom:1px solid #e5dfd2;">' + value + '</td></tr>';
   }
   row('Name', esc_(rec.firstName + ' ' + rec.lastName));
   row('Attending', attending ? 'Joyfully accepts' : 'Regretfully declines');
@@ -337,66 +341,94 @@ function buildConfirmationHtml_(rec, editUrl, updateMode, attending, intro) {
       if (rec.plusOneNotes)   row('Plus-one notes',   esc_(rec.plusOneNotes));
     }
     if (rec.dietary) row('Dietary', esc_(rec.dietary));
-    row('Allergies', rec.notes ? esc_(rec.notes) : '<span style="color:#a8a49c;">None</span>');
+    row('Allergies', rec.notes ? esc_(rec.notes) : '<span style="color:#a8a49c;font-style:italic;">None</span>');
   }
 
-  // Hairline above the signature to separate the note from the CTA.
   return [
     '<!DOCTYPE html>',
     '<html lang="en"><head><meta charset="UTF-8">',
     '<meta name="viewport" content="width=device-width,initial-scale=1">',
+    // Suppress Apple Mail / iOS dark-mode auto-inversion of the cream card.
+    '<meta name="color-scheme" content="light only">',
+    '<meta name="supported-color-schemes" content="light">',
     '<title>Your RSVP</title></head>',
     '<body style="margin:0;padding:0;background:#ece8e1;font-family:Georgia,serif;color:#2a2a2a;-webkit-font-smoothing:antialiased;">',
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#ece8e1;">',
-      '<tr><td align="center" style="padding:32px 16px;">',
-        '<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:#ffffff;border:1px solid #e5dfd2;">',
+      '<tr><td align="center" style="padding:48px 16px;">',
+        '<table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;background:#f8f6f3;border:1px solid #e5dfd2;">',
           // ── Header band ──
-          '<tr><td align="center" style="background:#0a0a0a;padding:48px 32px 40px 32px;">',
-            '<div style="font-family:\'Playfair Display\',Georgia,serif;font-weight:300;font-size:38px;line-height:1;color:#f8f6f3;letter-spacing:-0.01em;">',
-              'Yoojin <span style="color:#c9a96e;font-style:italic;font-family:Georgia,serif;">&amp;</span> Zoey',
+          '<tr><td align="center" style="background:#0a0a0a;padding:64px 32px 56px 32px;">',
+            // Ornament: 60px gold bar · ◆ · 60px gold bar
+            '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 28px auto;"><tr>',
+              '<td style="width:60px;height:1px;background:#c9a96e;line-height:1px;font-size:0;">&nbsp;</td>',
+              '<td style="padding:0 10px;font-family:Georgia,serif;color:#c9a96e;font-size:8px;line-height:1;">&#9830;</td>',
+              '<td style="width:60px;height:1px;background:#c9a96e;line-height:1px;font-size:0;">&nbsp;</td>',
+            '</tr></table>',
+            // Monogram "Y · Z" — Playfair italic 64px (falls back to Georgia italic cleanly)
+            '<div style="font-family:\'Playfair Display\',Georgia,serif;font-style:italic;font-weight:400;font-size:64px;line-height:1;color:#f8f6f3;letter-spacing:0.02em;">',
+              'Y <span style="color:#c9a96e;font-style:italic;font-family:Georgia,serif;">&middot;</span> Z',
             '</div>',
-            '<div style="width:40px;height:1px;background:#c9a96e;margin:20px auto 0 auto;line-height:1px;font-size:0;">&nbsp;</div>',
-            '<div style="font-family:Helvetica,Arial,sans-serif;font-weight:300;font-size:11px;letter-spacing:0.4em;color:#c9a96e;text-transform:uppercase;margin-top:18px;">',
-              'November 1, 2026 &middot; Taipei',
+            // Italic subscript with the full names — backup legibility
+            '<div style="font-family:Georgia,serif;font-style:italic;font-weight:400;font-size:15px;letter-spacing:0.08em;color:#e2d1a8;margin-top:14px;">',
+              'Yoojin &amp; Zoey',
+            '</div>',
+            // Date + location — muted so the gold ornament stays the only bright accent
+            '<div style="font-family:Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:0.45em;color:#7a7670;text-transform:uppercase;margin-top:24px;">',
+              '1 November 2026 &nbsp;&middot;&nbsp; Taipei',
             '</div>',
           '</td></tr>',
-          // ── Eyebrow + heading ──
-          '<tr><td align="center" style="padding:40px 40px 8px 40px;">',
-            '<div style="font-family:Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:0.4em;color:#c9a96e;text-transform:uppercase;margin-bottom:16px;">',
+          // ── Eyebrow + hairline + heading ──
+          '<tr><td align="center" style="padding:56px 56px 8px 56px;">',
+            '<div style="font-family:Helvetica,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.5em;color:#c9a96e;text-transform:uppercase;">',
               esc_(eyebrow),
             '</div>',
-            '<div style="font-family:Georgia,serif;font-style:italic;font-weight:400;font-size:26px;line-height:1.3;color:#0a0a0a;">',
+            '<div style="height:22px;line-height:22px;font-size:0;">&nbsp;</div>',
+            hairline,
+            '<div style="height:22px;line-height:22px;font-size:0;">&nbsp;</div>',
+            '<div style="font-family:\'Playfair Display\',Georgia,serif;font-style:italic;font-weight:400;font-size:34px;line-height:1.25;color:#0a0a0a;letter-spacing:0.005em;">',
               esc_(heading),
             '</div>',
           '</td></tr>',
           // ── Greeting + intro ──
-          '<tr><td style="padding:24px 40px 24px 40px;font-family:Georgia,serif;font-size:15px;line-height:1.75;color:#2a2a2a;">',
-            '<p style="margin:0 0 16px 0;">Hi ' + esc_(rec.firstName) + ',</p>',
+          '<tr><td style="padding:32px 56px 8px 56px;font-family:Georgia,serif;font-size:15px;line-height:1.8;color:#2a2a2a;">',
+            '<p style="margin:0 0 14px 0;">Hi ' + esc_(rec.firstName) + ',</p>',
             '<p style="margin:0;">' + esc_(intro) + '</p>',
           '</td></tr>',
-          // ── Response summary ──
-          '<tr><td style="padding:8px 40px 32px 40px;">',
-            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #e5dfd2;">',
+          // ── Response summary (editorial listing) ──
+          '<tr><td style="padding:24px 56px 32px 56px;">',
+            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">',
               rows,
             '</table>',
           '</td></tr>',
           // ── CTA ──
-          '<tr><td align="center" style="padding:8px 40px 48px 40px;">',
-            '<p style="margin:0 0 24px 0;font-family:Georgia,serif;font-size:14px;line-height:1.75;color:#5a554f;">',
-              'Need to change something? You can update your response any time before ' + esc_(RSVP_DEADLINE) + '.',
+          '<tr><td align="center" style="padding:8px 56px 48px 56px;">',
+            hairline,
+            '<div style="height:28px;line-height:28px;font-size:0;">&nbsp;</div>',
+            '<p style="margin:0 0 28px 0;font-family:Georgia,serif;font-style:italic;font-size:14px;line-height:1.7;color:#5a554f;">',
+              'Plans change &mdash; you may update your response any time before ' + esc_(RSVP_DEADLINE) + '.',
             '</p>',
-            '<a href="' + esc_(editUrl) + '" style="display:inline-block;padding:15px 38px;background:#c9a96e;color:#0a0a0a;text-decoration:none;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:500;letter-spacing:0.35em;text-transform:uppercase;border:1px solid #c9a96e;">',
+            // Outlook desktop ignores padding on <a>; give it a real box via VML.
+            '<!--[if mso]>',
+            '<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="' + esc_(editUrl) + '" style="height:48px;v-text-anchor:middle;width:260px;" arcsize="0%" strokecolor="#c9a96e" fillcolor="#f8f6f3">',
+            '<w:anchorlock/>',
+            '<center style="color:#0a0a0a;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.4em;text-transform:uppercase;">Update My RSVP</center>',
+            '</v:roundrect>',
+            '<![endif]-->',
+            '<!--[if !mso]><!-- -->',
+            '<a href="' + esc_(editUrl) + '" style="display:inline-block;padding:16px 42px;background:#f8f6f3;color:#0a0a0a;text-decoration:none;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.4em;text-transform:uppercase;border:1px solid #c9a96e;">',
               'Update My RSVP',
             '</a>',
-            '<p style="margin:18px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:0.1em;color:#a8a49c;word-break:break-all;">',
-              'Or copy &amp; paste: ',
+            '<!--<![endif]-->',
+            '<p style="margin:22px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:0.08em;color:#a8a49c;word-break:break-all;">',
               '<a href="' + esc_(editUrl) + '" style="color:#a8a49c;text-decoration:underline;">' + esc_(editUrl) + '</a>',
             '</p>',
           '</td></tr>',
           // ── Footer ──
-          '<tr><td align="center" style="background:#faf7f1;border-top:1px solid #e5dfd2;padding:36px 40px 40px 40px;">',
-            '<div style="font-family:Georgia,serif;font-style:italic;font-size:15px;color:#5a554f;margin-bottom:10px;">With love,</div>',
-            '<div style="font-family:\'Playfair Display\',Georgia,serif;font-weight:300;font-size:24px;color:#0a0a0a;">',
+          '<tr><td align="center" style="background:#ece8e1;border-top:1px solid #e5dfd2;padding:48px 40px 52px 40px;">',
+            hairline,
+            '<div style="height:24px;line-height:24px;font-size:0;">&nbsp;</div>',
+            '<div style="font-family:Georgia,serif;font-style:italic;font-size:15px;color:#5a554f;margin-bottom:14px;letter-spacing:0.04em;">With love,</div>',
+            '<div style="font-family:\'Playfair Display\',Georgia,serif;font-style:italic;font-weight:400;font-size:30px;color:#0a0a0a;letter-spacing:0.01em;">',
               'Yoojin <span style="color:#c9a96e;font-style:italic;font-family:Georgia,serif;">&amp;</span> Zoey',
             '</div>',
           '</td></tr>',
