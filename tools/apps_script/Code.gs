@@ -32,7 +32,7 @@
 // ─── CONFIG ─────────────────────────────────────────────────────────────
 var SHEET_NAME        = 'RSVPs';
 var CONFIRM_FROM_NAME = 'Yoojin & Zoey';
-var WEDDING_SITE_URL  = 'https://yz-wedding.example.com/';  // no trailing path; edit links append ?rsvp=TOKEN
+var WEDDING_SITE_URL  = 'https://www.yoojinandzoey.com/';  // no trailing path; edit links append ?rsvp=TOKEN
 var RSVP_DEADLINE     = 'September 15, 2026';
 
 // Column order in the sheet. If you reorder columns, update HEADERS accordingly.
