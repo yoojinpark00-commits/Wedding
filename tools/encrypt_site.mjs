@@ -260,10 +260,13 @@ const runtime = String.raw`
         attending: form.querySelector('[data-field="attending"]'),
         guests:    form.querySelector('[data-field="guests"]'),
         notes:     form.querySelector('[data-field="notes"]'),
+        dietary:   form.querySelector('[data-field="dietary"]'),
         plusOneFirstName: form.querySelector('[data-field="plusOneFirstName"]'),
         plusOneLastName:  form.querySelector('[data-field="plusOneLastName"]'),
         plusOneNotes:     form.querySelector('[data-field="plusOneNotes"]'),
-        plusOneWrap:      form.querySelector('[data-plus-one]')
+        plusOneDietary:   form.querySelector('[data-field="plusOneDietary"]'),
+        plusOneWrap:      form.querySelector('[data-plus-one]'),
+        attendingWrap:    form.querySelector('[data-attending-fields]')
       };
     }
     return {
@@ -273,10 +276,13 @@ const runtime = String.raw`
       attending: document.getElementById('attending'),
       guests:    document.getElementById('guests'),
       notes:     document.getElementById('notes'),
+      dietary:   document.getElementById('dietary'),
       plusOneFirstName: document.getElementById('plusOneFirstName'),
       plusOneLastName:  document.getElementById('plusOneLastName'),
       plusOneNotes:     document.getElementById('plusOneNotes'),
-      plusOneWrap:      document.querySelector('#page-home [data-plus-one]')
+      plusOneDietary:   document.getElementById('plusOneDietary'),
+      plusOneWrap:      document.querySelector('#page-home [data-plus-one]'),
+      attendingWrap:    document.querySelector('#page-home [data-attending-fields]')
     };
   }
 
@@ -292,16 +298,31 @@ const runtime = String.raw`
       if (f.plusOneFirstName) f.plusOneFirstName.value = '';
       if (f.plusOneLastName)  f.plusOneLastName.value  = '';
       if (f.plusOneNotes)     f.plusOneNotes.value     = '';
+      if (f.plusOneDietary)   f.plusOneDietary.value   = '';
     }
   }
 
-  function wirePlusOneToggles() {
+  // Collapse the rest of the form when the guest declines. Values stay in
+  // the DOM (so switching back restores what they typed) but submitRSVP
+  // strips them from the outgoing payload.
+  function updateAttendingVisibility(f) {
+    if (!f.attendingWrap) return;
+    var declined = f.attending && f.attending.value === 'Regretfully Declines';
+    if (declined) f.attendingWrap.setAttribute('hidden', '');
+    else          f.attendingWrap.removeAttribute('hidden');
+  }
+
+  function wireRSVPToggles() {
     ['home', 'page'].forEach(function(src) {
       var f = getFormFields(src);
-      if (!f.guests) return;
-      // Initial sync (handles edit-mode prefill where guests is already '2').
-      updatePlusOneVisibility(f);
-      f.guests.addEventListener('change', function() { updatePlusOneVisibility(f); });
+      if (f.guests) {
+        updatePlusOneVisibility(f);
+        f.guests.addEventListener('change', function() { updatePlusOneVisibility(f); });
+      }
+      if (f.attending) {
+        updateAttendingVisibility(f);
+        f.attending.addEventListener('change', function() { updateAttendingVisibility(f); });
+      }
     });
   }
 
@@ -333,9 +354,12 @@ const runtime = String.raw`
       var g = String(rsvp.guests || 1);
       if (g === '1' || g === '2') { f.guests.value = g; f.guests.classList.add('selected'); }
       f.notes.value = rsvp.notes || '';
+      if (f.dietary) f.dietary.value = (rsvp.dietary === 'Vegetarian' || rsvp.dietary === 'Vegan') ? rsvp.dietary : '';
       if (f.plusOneFirstName) f.plusOneFirstName.value = rsvp.plusOneFirstName || '';
       if (f.plusOneLastName)  f.plusOneLastName.value  = rsvp.plusOneLastName  || '';
       if (f.plusOneNotes)     f.plusOneNotes.value     = rsvp.plusOneNotes     || '';
+      if (f.plusOneDietary)   f.plusOneDietary.value   = (rsvp.plusOneDietary === 'Vegetarian' || rsvp.plusOneDietary === 'Vegan') ? rsvp.plusOneDietary : '';
+      updateAttendingVisibility(f);
       updatePlusOneVisibility(f);
     });
   }
@@ -369,18 +393,31 @@ const runtime = String.raw`
     var attending = f.attending.value;
     var guests    = f.guests.value;
     var notes     = f.notes.value.trim();
+    var dietary   = (f.dietary && f.dietary.value) || '';
     var p1First   = (f.plusOneFirstName && f.plusOneFirstName.value || '').trim();
     var p1Last    = (f.plusOneLastName  && f.plusOneLastName.value  || '').trim();
     var p1Notes   = (f.plusOneNotes     && f.plusOneNotes.value     || '').trim();
+    var p1Dietary = (f.plusOneDietary   && f.plusOneDietary.value)  || '';
     var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254;
     if (!firstName || !lastName) { showToast(L['toast.name']); return; }
     if (!email || !emailOk) { showToast(L['toast.email']); return; }
     if (!attending) { showToast(L['toast.attend']); return; }
-    if (guests !== '1' && guests !== '2') guests = '1';
-    if (guests === '2' && (!p1First || !p1Last)) {
-      showToast(L['toast.plusOneName'] || 'Please enter your +1\'s name');
-      return;
+
+    var declined = attending === 'Regretfully Declines';
+    if (declined) {
+      // Strip anything the guest may have typed before declining.
+      guests = '1'; notes = ''; dietary = '';
+      p1First = p1Last = p1Notes = ''; p1Dietary = '';
+    } else {
+      if (guests !== '1' && guests !== '2') guests = '1';
+      if (guests === '2' && (!p1First || !p1Last)) {
+        showToast(L['toast.plusOneName'] || 'Please enter your +1\'s name');
+        return;
+      }
     }
+    if (dietary !== 'Vegetarian' && dietary !== 'Vegan') dietary = '';
+    if (p1Dietary !== 'Vegetarian' && p1Dietary !== 'Vegan') p1Dietary = '';
+
     firstName = firstName.slice(0, 60);
     lastName  = lastName.slice(0, 60);
     notes     = notes.slice(0, 500);
@@ -396,10 +433,11 @@ const runtime = String.raw`
     var payload = {
       action: isUpdate ? 'update' : 'create',
       firstName: firstName, lastName: lastName, email: email,
-      attending: attending, guests: guests, notes: notes,
-      plusOneFirstName: guests === '2' ? p1First : '',
-      plusOneLastName:  guests === '2' ? p1Last  : '',
-      plusOneNotes:     guests === '2' ? p1Notes : ''
+      attending: attending, guests: guests, notes: notes, dietary: dietary,
+      plusOneFirstName: guests === '2' ? p1First   : '',
+      plusOneLastName:  guests === '2' ? p1Last    : '',
+      plusOneNotes:     guests === '2' ? p1Notes   : '',
+      plusOneDietary:   guests === '2' ? p1Dietary : ''
     };
     if (isUpdate) payload.token = rsvpEditToken;
     btn.textContent = 'SENDING...';
@@ -449,12 +487,17 @@ const runtime = String.raw`
        'plusOneFirstName','plusOneLastName','plusOneNotes'].forEach(function(id){
         var el = document.getElementById(id); if (el) el.value='';
       });
-      var a = document.getElementById('attending'); if (a) a.selectedIndex=0;
-      var g = document.getElementById('guests'); if (g) g.selectedIndex=0;
+      ['attending','guests','dietary','plusOneDietary'].forEach(function(id){
+        var el = document.getElementById(id); if (el) el.selectedIndex = 0;
+      });
     }
-    // Hide the +1 panel on both forms after a reset.
+    // Hide the +1 panel on both forms after a reset; show the attending
+    // block since attending is now back to its empty default.
     document.querySelectorAll('[data-plus-one]').forEach(function(el) {
       el.setAttribute('hidden', '');
+    });
+    document.querySelectorAll('[data-attending-fields]').forEach(function(el) {
+      el.removeAttribute('hidden');
     });
   }
 
@@ -492,8 +535,8 @@ const runtime = String.raw`
     updateCountdown();
     setInterval(updateCountdown, 1000);
     initReveals();
-    // Bind the +1 reveal/hide on both RSVP forms.
-    wirePlusOneToggles();
+    // Bind the attending→fields + +1 reveal/hide on both RSVP forms.
+    wireRSVPToggles();
     // If the guest arrived via an edit link, prefill their existing RSVP.
     initRSVPEditMode();
   }

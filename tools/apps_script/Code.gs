@@ -41,7 +41,8 @@ var RSVP_DEADLINE     = 'September 15, 2026';
 var HEADERS = [
   'Timestamp', 'Token', 'First Name', 'Last Name', 'Email',
   'Attending', 'Guests', 'Notes', 'Last Updated',
-  'Plus One First Name', 'Plus One Last Name', 'Plus One Notes'
+  'Plus One First Name', 'Plus One Last Name', 'Plus One Notes',
+  'Dietary', 'Plus One Dietary'
 ];
 
 // Cap on total guests (1 = just them, 2 = them + one +1).
@@ -102,7 +103,8 @@ function handleCreate(p) {
     sheet.appendRow([
       now, token, rec.firstName, rec.lastName, rec.email,
       rec.attending, rec.guests, rec.notes, now,
-      rec.plusOneFirstName, rec.plusOneLastName, rec.plusOneNotes
+      rec.plusOneFirstName, rec.plusOneLastName, rec.plusOneNotes,
+      rec.dietary, rec.plusOneDietary
     ]);
     sendConfirmationEmail_(rec, token, /*updateMode*/ false);
     return { ok: true, token: token, mode: 'created' };
@@ -183,10 +185,11 @@ function applyUpdate_(sheet, target, rec, sendEmail, updateMode) {
   var now = new Date();
   // Preserve original Timestamp (col 1) and Token (col 2); overwrite the rest.
   var token = String(target.values[1]);
-  sheet.getRange(target.rowNumber, 3, 1, 10).setValues([[
+  sheet.getRange(target.rowNumber, 3, 1, 12).setValues([[
     rec.firstName, rec.lastName, rec.email,
     rec.attending, rec.guests, rec.notes, now,
-    rec.plusOneFirstName, rec.plusOneLastName, rec.plusOneNotes
+    rec.plusOneFirstName, rec.plusOneLastName, rec.plusOneNotes,
+    rec.dietary, rec.plusOneDietary
   ]]);
   if (sendEmail) sendConfirmationEmail_(rec, token, updateMode);
   return { ok: true, token: token, mode: updateMode ? 'updated' : 'merged' };
@@ -200,11 +203,13 @@ function rowToObject(values) {
     attending: values[5],
     guests:    Number(values[6]) || 1,
     notes:     values[7],
-    // Cells 9–11 (0-indexed) are added in v2; legacy rows return undefined,
-    // which we normalise to empty strings so the prefill flow works cleanly.
+    // Cells 9–13 (0-indexed) are later additions; legacy rows return
+    // undefined, which we normalise to '' so prefill works cleanly.
     plusOneFirstName: values[9]  || '',
     plusOneLastName:  values[10] || '',
-    plusOneNotes:     values[11] || ''
+    plusOneNotes:     values[11] || '',
+    dietary:          values[12] || '',
+    plusOneDietary:   values[13] || ''
   };
 }
 
@@ -216,21 +221,33 @@ function validateInput(p) {
   var attending = sanitize(p.attending, 40);
   var guests    = parseInt(p.guests, 10);
   var notes     = sanitize(p.notes,     500);
+  var dietary   = sanitize(p.dietary,   30);
   var p1First   = sanitize(p.plusOneFirstName, 60);
   var p1Last    = sanitize(p.plusOneLastName,  60);
   var p1Notes   = sanitize(p.plusOneNotes,     500);
+  var p1Dietary = sanitize(p.plusOneDietary,   30);
 
   if (!firstName || !lastName) return { error: 'missing-name' };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: 'bad-email' };
   if (attending !== 'Joyfully Accepts' && attending !== 'Regretfully Declines') {
     return { error: 'bad-attending' };
   }
+  // Dietary is an enum; anything unexpected becomes blank.
+  if (dietary   !== 'Vegetarian' && dietary   !== 'Vegan') dietary   = '';
+  if (p1Dietary !== 'Vegetarian' && p1Dietary !== 'Vegan') p1Dietary = '';
+
   if (!(guests >= 1 && guests <= MAX_GUESTS)) guests = 1;
+  // If they declined, strip anything that might have been entered before.
+  if (attending === 'Regretfully Declines') {
+    guests = 1; notes = ''; dietary = '';
+    p1First = ''; p1Last = ''; p1Notes = ''; p1Dietary = '';
+  }
   // If they're coming solo, wipe any +1 details that slipped in.
-  if (guests !== 2) { p1First = ''; p1Last = ''; p1Notes = ''; }
+  if (guests !== 2) { p1First = ''; p1Last = ''; p1Notes = ''; p1Dietary = ''; }
   return { firstName: firstName, lastName: lastName, email: email,
-           attending: attending, guests: guests, notes: notes,
-           plusOneFirstName: p1First, plusOneLastName: p1Last, plusOneNotes: p1Notes };
+           attending: attending, guests: guests, notes: notes, dietary: dietary,
+           plusOneFirstName: p1First, plusOneLastName: p1Last, plusOneNotes: p1Notes,
+           plusOneDietary: p1Dietary };
 }
 
 function sanitize(v, maxLen) {
@@ -259,14 +276,18 @@ function sendConfirmationEmail_(rec, token, updateMode) {
     '',
     'Your response:',
     'Name:       ' + rec.firstName + ' ' + rec.lastName,
-    'Attending:  ' + (attending ? 'Yes' : 'No'),
-    'Guests:     ' + rec.guests + (rec.guests > 1 ? ' (including your +1)' : '')
+    'Attending:  ' + (attending ? 'Yes' : 'No')
   ];
-  if (rec.guests === 2 && (rec.plusOneFirstName || rec.plusOneLastName)) {
-    plainLines.push('Plus One:   ' + (rec.plusOneFirstName + ' ' + rec.plusOneLastName).trim());
-    if (rec.plusOneNotes) plainLines.push('+1 Notes:   ' + rec.plusOneNotes);
+  if (attending) {
+    plainLines.push('Plus-one:   ' + (rec.guests === 2 ? 'Yes' : 'No'));
+    if (rec.guests === 2 && (rec.plusOneFirstName || rec.plusOneLastName)) {
+      plainLines.push('  Name:     ' + (rec.plusOneFirstName + ' ' + rec.plusOneLastName).trim());
+      if (rec.plusOneDietary) plainLines.push('  Dietary:  ' + rec.plusOneDietary);
+      if (rec.plusOneNotes)   plainLines.push('  Notes:    ' + rec.plusOneNotes);
+    }
+    if (rec.dietary) plainLines.push('Dietary:    ' + rec.dietary);
+    if (rec.notes)   plainLines.push('Allergies:  ' + rec.notes);
   }
-  plainLines.push('Notes:      ' + (rec.notes || '—'));
   plainLines.push('', 'Need to change something? Update your RSVP any time before ' + RSVP_DEADLINE + ':',
                    editUrl, '', 'With love,', 'Yoojin & Zoey');
   var body = plainLines.join('\n');
@@ -308,12 +329,16 @@ function buildConfirmationHtml_(rec, editUrl, updateMode, attending, intro) {
   }
   row('Name', esc_(rec.firstName + ' ' + rec.lastName));
   row('Attending', attending ? 'Joyfully accepts' : 'Regretfully declines');
-  row('Guests', rec.guests === 2 ? 'Two (you + one +1)' : 'Just you');
-  if (rec.guests === 2 && (rec.plusOneFirstName || rec.plusOneLastName)) {
-    row('Plus One', esc_((rec.plusOneFirstName + ' ' + rec.plusOneLastName).trim()));
-    if (rec.plusOneNotes) row('+1 Notes', esc_(rec.plusOneNotes));
+  if (attending) {
+    row('Plus-one', rec.guests === 2 ? 'Yes' : 'No');
+    if (rec.guests === 2 && (rec.plusOneFirstName || rec.plusOneLastName)) {
+      row('Plus-one name', esc_((rec.plusOneFirstName + ' ' + rec.plusOneLastName).trim()));
+      if (rec.plusOneDietary) row('Plus-one dietary', esc_(rec.plusOneDietary));
+      if (rec.plusOneNotes)   row('Plus-one notes',   esc_(rec.plusOneNotes));
+    }
+    if (rec.dietary) row('Dietary', esc_(rec.dietary));
+    row('Allergies', rec.notes ? esc_(rec.notes) : '<span style="color:#a8a49c;">None</span>');
   }
-  row('Notes', rec.notes ? esc_(rec.notes) : '<span style="color:#a8a49c;">—</span>');
 
   // Hairline above the signature to separate the note from the CTA.
   return [
