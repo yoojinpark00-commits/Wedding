@@ -97,9 +97,26 @@ const runtime = String.raw`
     saltHex: '__SALT_HEX__',
     ivHex:   '__IV_HEX__',
     iterations: __ITERS__,
-    ctB64:   '__CT_B64__',
-    sessionKey: 'yz-wedding-session'
+    ctB64:   '__CT_B64__'
   };
+  // Scope the cache to the current ciphertext so a new deploy auto-
+  // invalidates old tabs — they won't replay stale decrypted content.
+  var SESSION_PREFIX = 'yz-wedding-session';
+  VAULT.sessionKey = SESSION_PREFIX + ':' + VAULT.ctB64.slice(0, 16);
+
+  // Evict any older session caches from prior deploys. Runs once at startup.
+  function pruneStaleSessionCache() {
+    try {
+      // Legacy un-versioned key from early deploys.
+      sessionStorage.removeItem(SESSION_PREFIX);
+      for (var i = sessionStorage.length - 1; i >= 0; i--) {
+        var k = sessionStorage.key(i);
+        if (k && k.indexOf(SESSION_PREFIX + ':') === 0 && k !== VAULT.sessionKey) {
+          sessionStorage.removeItem(k);
+        }
+      }
+    } catch (e) { /* storage may be blocked; non-fatal */ }
+  }
 
   // ── helpers ──
   function hexToBytes(h) {
@@ -548,7 +565,9 @@ const runtime = String.raw`
                   : (nav.indexOf('zh') === 0 ? 'zh' : 'en');
     setGateLang(preferred);
 
-    // Restore previously-decrypted vault for this tab.
+    // Drop any cache entries from older deploys, then try to restore the
+    // decrypted vault for *this* deploy's ciphertext.
+    pruneStaleSessionCache();
     try {
       var cached = sessionStorage.getItem(VAULT.sessionKey);
       if (cached) { bootSite(JSON.parse(cached)); return; }
