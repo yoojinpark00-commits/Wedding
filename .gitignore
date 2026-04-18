@@ -1,0 +1,4 @@
+# Local-only plaintext source of the site, kept outside git so GitHub Pages
+# never serves the unencrypted content. Edit this file, then re-run the
+# encrypter to regenerate the public index.html.
+tools/_plaintext/
