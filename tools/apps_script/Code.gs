@@ -58,11 +58,16 @@ function doGet(e) {
 function doPost(e) {
   try {
     var params = e.parameter || {};
+    console.log('doPost params:', JSON.stringify(params));
     var action = (params.action || 'create').toLowerCase();
-    if (action === 'create') return jsonOut(handleCreate(params));
-    if (action === 'update') return jsonOut(handleUpdate(params));
-    return jsonOut({ ok: false, error: 'unknown-action' });
+    var result;
+    if (action === 'create')      result = handleCreate(params);
+    else if (action === 'update') result = handleUpdate(params);
+    else                          result = { ok: false, error: 'unknown-action' };
+    console.log('doPost result:', JSON.stringify(result));
+    return jsonOut(result);
   } catch (err) {
+    console.error('doPost threw:', err && err.stack || err);
     return jsonOut({ ok: false, error: String(err) });
   }
 }
