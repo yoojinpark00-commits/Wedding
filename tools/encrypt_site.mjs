@@ -406,7 +406,7 @@ const runtime = String.raw`
   // =====================================================
   // IMPORTANT: Replace with your Google Apps Script URL
   // =====================================================
-  window.GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_SCRIPT_URL_HERE';
+  window.GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz7XrXIBTZVXGnpVXtMph2t1IBgBrFllcJ4Cbp_6hqBw6n4LPPUYjR3Ijwhe03Vdaki/exec';
 
   function bootSite(vault) {
     T = vault.T;
