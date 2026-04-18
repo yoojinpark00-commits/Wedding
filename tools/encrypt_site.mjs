@@ -259,7 +259,11 @@ const runtime = String.raw`
         email:     form.querySelector('[data-field="email"]'),
         attending: form.querySelector('[data-field="attending"]'),
         guests:    form.querySelector('[data-field="guests"]'),
-        notes:     form.querySelector('[data-field="notes"]')
+        notes:     form.querySelector('[data-field="notes"]'),
+        plusOneFirstName: form.querySelector('[data-field="plusOneFirstName"]'),
+        plusOneLastName:  form.querySelector('[data-field="plusOneLastName"]'),
+        plusOneNotes:     form.querySelector('[data-field="plusOneNotes"]'),
+        plusOneWrap:      form.querySelector('[data-plus-one]')
       };
     }
     return {
@@ -268,8 +272,37 @@ const runtime = String.raw`
       email:     document.getElementById('email'),
       attending: document.getElementById('attending'),
       guests:    document.getElementById('guests'),
-      notes:     document.getElementById('notes')
+      notes:     document.getElementById('notes'),
+      plusOneFirstName: document.getElementById('plusOneFirstName'),
+      plusOneLastName:  document.getElementById('plusOneLastName'),
+      plusOneNotes:     document.getElementById('plusOneNotes'),
+      plusOneWrap:      document.querySelector('#page-home [data-plus-one]')
     };
+  }
+
+  // Reveal the +1 details when guests==='2', hide (and clear) otherwise.
+  function updatePlusOneVisibility(f) {
+    if (!f.plusOneWrap) return;
+    var show = f.guests && f.guests.value === '2';
+    if (show) {
+      f.plusOneWrap.removeAttribute('hidden');
+    } else {
+      f.plusOneWrap.setAttribute('hidden', '');
+      // Clear so hidden values never make it into the payload.
+      if (f.plusOneFirstName) f.plusOneFirstName.value = '';
+      if (f.plusOneLastName)  f.plusOneLastName.value  = '';
+      if (f.plusOneNotes)     f.plusOneNotes.value     = '';
+    }
+  }
+
+  function wirePlusOneToggles() {
+    ['home', 'page'].forEach(function(src) {
+      var f = getFormFields(src);
+      if (!f.guests) return;
+      // Initial sync (handles edit-mode prefill where guests is already '2').
+      updatePlusOneVisibility(f);
+      f.guests.addEventListener('change', function() { updatePlusOneVisibility(f); });
+    });
   }
 
   function applyRSVPButtonLabels() {
@@ -300,6 +333,10 @@ const runtime = String.raw`
       var g = String(rsvp.guests || 1);
       if (g === '1' || g === '2') { f.guests.value = g; f.guests.classList.add('selected'); }
       f.notes.value = rsvp.notes || '';
+      if (f.plusOneFirstName) f.plusOneFirstName.value = rsvp.plusOneFirstName || '';
+      if (f.plusOneLastName)  f.plusOneLastName.value  = rsvp.plusOneLastName  || '';
+      if (f.plusOneNotes)     f.plusOneNotes.value     = rsvp.plusOneNotes     || '';
+      updatePlusOneVisibility(f);
     });
   }
 
@@ -332,14 +369,24 @@ const runtime = String.raw`
     var attending = f.attending.value;
     var guests    = f.guests.value;
     var notes     = f.notes.value.trim();
+    var p1First   = (f.plusOneFirstName && f.plusOneFirstName.value || '').trim();
+    var p1Last    = (f.plusOneLastName  && f.plusOneLastName.value  || '').trim();
+    var p1Notes   = (f.plusOneNotes     && f.plusOneNotes.value     || '').trim();
     var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254;
     if (!firstName || !lastName) { showToast(L['toast.name']); return; }
     if (!email || !emailOk) { showToast(L['toast.email']); return; }
     if (!attending) { showToast(L['toast.attend']); return; }
+    if (guests !== '1' && guests !== '2') guests = '1';
+    if (guests === '2' && (!p1First || !p1Last)) {
+      showToast(L['toast.plusOneName'] || 'Please enter your +1\'s name');
+      return;
+    }
     firstName = firstName.slice(0, 60);
     lastName  = lastName.slice(0, 60);
     notes     = notes.slice(0, 500);
-    if (guests !== '1' && guests !== '2') guests = '1';
+    p1First   = p1First.slice(0, 60);
+    p1Last    = p1Last.slice(0, 60);
+    p1Notes   = p1Notes.slice(0, 500);
     var url = window.GOOGLE_SCRIPT_URL || 'YOUR_GOOGLE_SCRIPT_URL_HERE';
     if (!url || url.indexOf('YOUR_GOOGLE_SCRIPT_URL') === 0) {
       showToast(L['toast.configErr'] || 'RSVP endpoint not configured');
@@ -349,7 +396,10 @@ const runtime = String.raw`
     var payload = {
       action: isUpdate ? 'update' : 'create',
       firstName: firstName, lastName: lastName, email: email,
-      attending: attending, guests: guests, notes: notes
+      attending: attending, guests: guests, notes: notes,
+      plusOneFirstName: guests === '2' ? p1First : '',
+      plusOneLastName:  guests === '2' ? p1Last  : '',
+      plusOneNotes:     guests === '2' ? p1Notes : ''
     };
     if (isUpdate) payload.token = rsvpEditToken;
     btn.textContent = 'SENDING...';
@@ -395,12 +445,17 @@ const runtime = String.raw`
         else { f.value=''; }
       });
     } else {
-      ['firstName','lastName','email','notes'].forEach(function(id){
+      ['firstName','lastName','email','notes',
+       'plusOneFirstName','plusOneLastName','plusOneNotes'].forEach(function(id){
         var el = document.getElementById(id); if (el) el.value='';
       });
       var a = document.getElementById('attending'); if (a) a.selectedIndex=0;
       var g = document.getElementById('guests'); if (g) g.selectedIndex=0;
     }
+    // Hide the +1 panel on both forms after a reset.
+    document.querySelectorAll('[data-plus-one]').forEach(function(el) {
+      el.setAttribute('hidden', '');
+    });
   }
 
   // =====================================================
@@ -437,6 +492,8 @@ const runtime = String.raw`
     updateCountdown();
     setInterval(updateCountdown, 1000);
     initReveals();
+    // Bind the +1 reveal/hide on both RSVP forms.
+    wirePlusOneToggles();
     // If the guest arrived via an edit link, prefill their existing RSVP.
     initRSVPEditMode();
   }
