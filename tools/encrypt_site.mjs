@@ -229,18 +229,43 @@ const runtime = String.raw`
     updateCountdown();
   };
 
+  function pad2(n) { n = String(n); return n.length < 2 ? '0' + n : n; }
   function updateCountdown() {
     var el = document.getElementById('countdown');
     if (!el || !T) return;
     var wedding = new Date('2026-11-01T11:00:00+08:00');
     var diff = wedding - new Date();
-    if (diff <= 0) { el.textContent = T[currentLang]['countdown.today']; return; }
+    var L = T[currentLang];
+    if (diff <= 0) {
+      // Single-line "today's the day" message.
+      el.setAttribute('data-state', 'today');
+      el.textContent = L['countdown.today'];
+      return;
+    }
+    el.setAttribute('data-state', 'counting');
     var d = Math.floor(diff / 86400000);
     var h = Math.floor((diff % 86400000) / 3600000);
     var m = Math.floor((diff % 3600000) / 60000);
     var s = Math.floor((diff % 60000) / 1000);
-    var L = T[currentLang];
-    el.textContent = d+' '+L['countdown.days']+' · '+h+' '+L['countdown.hours']+' · '+m+' '+L['countdown.min']+' · '+s+' '+L['countdown.sec'];
+    // Render 4 stacked cells (value over label) inside a hairline strip.
+    var cells = [
+      [d, L['countdown.days']],
+      [h, L['countdown.hours']],
+      [m, L['countdown.min']],
+      [s, L['countdown.sec']]
+    ];
+    // Only rebuild if the structure is missing; otherwise just update values.
+    var existing = el.querySelectorAll('.cd-cell');
+    if (existing.length !== 4) {
+      el.innerHTML = cells.map(function() {
+        return '<div class="cd-cell"><div class="cd-val"></div><div class="cd-label"></div></div>';
+      }).join('');
+      existing = el.querySelectorAll('.cd-cell');
+    }
+    for (var i = 0; i < 4; i++) {
+      existing[i].querySelector('.cd-val').textContent   = pad2(cells[i][0]);
+      existing[i].querySelector('.cd-label').textContent = cells[i][1];
+    }
   }
 
   function initReveals() {
